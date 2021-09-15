@@ -18,6 +18,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning")
 	class UBoxComponent* SpawningBox;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning")
+	TSubclassOf<class ACritter> PawnToSpawn;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -29,4 +32,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spawning")
 	FVector GetSpawnPoint();
 
+	//BlueprintNativeEvents can have both C++ and Blueprint functionnalities, they're hybrids
+	//with this _Implmentation, UE4 knows that this is the implmentation that we scripted out in C++ 
+	//and that part of it will also be carried out in blueprint
+	UFUNCTION(BlueprintNativeEvent, BLueprintCallable, Category = "Spawning")
+	void SpawnOurPawn(UClass* ToSpawn, const FVector& Location);
 };
