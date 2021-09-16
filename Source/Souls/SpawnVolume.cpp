@@ -35,6 +35,4 @@ FVector ASpawnVolume::GetSpawnPoint()
 	FVector OriginOfTheBox = SpawningBox->GetComponentLocation();
 
 	return UKismetMathLibrary::RandomPointInBoundingBox(OriginOfTheBox, Extent);
-
-
 }
