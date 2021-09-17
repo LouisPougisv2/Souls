@@ -4,6 +4,8 @@
 #include "SpawnVolume.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Engine/World.h"
+#include "Critter.h"
 
 // Sets default values
 ASpawnVolume::ASpawnVolume()
@@ -13,7 +15,7 @@ ASpawnVolume::ASpawnVolume()
 
 	SpawningBox = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawningBox"));
 }
-
+  
 // Called when the game starts or when spawned
 void ASpawnVolume::BeginPlay()
 {
@@ -35,4 +37,25 @@ FVector ASpawnVolume::GetSpawnPoint()
 	FVector OriginOfTheBox = SpawningBox->GetComponentLocation();
 
 	return UKismetMathLibrary::RandomPointInBoundingBox(OriginOfTheBox, Extent);
+<<<<<<< HEAD
 }
+=======
+
+
+}
+
+//the +Implementation come from the BlueprintNativeEvents
+void ASpawnVolume::SpawnOurPawn_Implementation(UClass* ToSpawn, const FVector& Location)
+{
+	if (ToSpawn)
+	{
+		UWorld* World = GetWorld();
+
+		if(World)
+		{
+			ACritter* SpawnedCritter = World->SpawnActor<ACritter>(ToSpawn, Location, FRotator(0.0f));
+		}
+	}
+}
+ 
+>>>>>>> main
