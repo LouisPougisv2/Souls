@@ -4,21 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Item.h"
-#include "Explosive.generated.h"
+#include "PickupItems.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SOULS_API AExplosive : public AItem
+class SOULS_API APickupItems : public AItem
 {
 	GENERATED_BODY()
-
+	
 public:
 
-	AExplosive();
+	APickupItems();
 
-	virtual void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override; 
+	virtual void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 	virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
-	
 };
