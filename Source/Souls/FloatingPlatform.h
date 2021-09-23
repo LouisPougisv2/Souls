@@ -36,9 +36,9 @@ public:
 	FTimerHandle InterpolationStopTimer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Floating Plateform")
-	bool bInterpolating;
+	bool bIsInterpolating;
 
-	float Distance;
+	float TotalDistanceToCover;
 
 protected:
 	// Called when the game starts or when spawned
@@ -48,7 +48,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void ToggleInterpolating();
+	void ToggleIsInterpolating();
 
 	void SwapVectors(FVector& V1, FVector& V2);
 

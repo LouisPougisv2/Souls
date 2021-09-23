@@ -16,7 +16,7 @@ AFloatingPlatform::AFloatingPlatform()
 	StartPoint = FVector(0.0f);
 	EndPoint = FVector(0.0f);
 
-	bInterpolating = false; 
+	bIsInterpolating = false; 
 
 
 }
@@ -32,12 +32,12 @@ void AFloatingPlatform::BeginPlay()
 	//EndPoint as followed
 	EndPoint += StartPoint;
 
-	InterpolationSpeed = 1.0f;
+	InterpolationSpeed = 2.0f;
 	InterpolationTime = 1.0f;
 
-	GetWorldTimerManager().SetTimer(InterpolationStopTimer, this, &AFloatingPlatform::ToggleInterpolating, InterpolationTime);
+	GetWorldTimerManager().SetTimer(InterpolationStopTimer, this, &AFloatingPlatform::ToggleIsInterpolating, InterpolationTime);
 
-	Distance = (EndPoint - StartPoint).Size();
+	TotalDistanceToCover = (EndPoint - StartPoint).Size();
 }
 
 // Called every frame
@@ -45,7 +45,7 @@ void AFloatingPlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bInterpolating)
+	if (bIsInterpolating)
 	{
 		//VInterpTo stands for Vector Interpolation in a three dimensional space
 		FVector CurrentLocation = GetActorLocation();
@@ -54,10 +54,10 @@ void AFloatingPlatform::Tick(float DeltaTime)
 		SetActorLocation(Interpolation);
 
 		float DistanceTraveled = (GetActorLocation() - StartPoint).Size();
-		if ((Distance - DistanceTraveled) <= 1.0f)
+		if ((TotalDistanceToCover - DistanceTraveled) <= 1.0f)
 		{
-			ToggleInterpolating();
-			GetWorldTimerManager().SetTimer(InterpolationStopTimer, this, &AFloatingPlatform::ToggleInterpolating, InterpolationTime);
+			ToggleIsInterpolating();
+			GetWorldTimerManager().SetTimer(InterpolationStopTimer, this, &AFloatingPlatform::ToggleIsInterpolating, InterpolationTime);
 			SwapVectors(StartPoint, EndPoint);
 		}
 	}
@@ -65,9 +65,9 @@ void AFloatingPlatform::Tick(float DeltaTime)
 }
 
 
-void AFloatingPlatform::ToggleInterpolating() 
+void AFloatingPlatform::ToggleIsInterpolating() 
 {
-	bInterpolating = !bInterpolating;
+	bIsInterpolating = !bIsInterpolating;
 }
 
 void AFloatingPlatform::SwapVectors(FVector& V1, FVector& V2)
