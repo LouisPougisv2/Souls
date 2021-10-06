@@ -50,7 +50,6 @@ AMainCharacter::AMainCharacter()
 	maxStamina = 350.0f;
 	stamina = 175.0f;
 	coins = 0;
-
 }
 
 // Called when the game starts or when spawned
@@ -124,4 +123,25 @@ void AMainCharacter::TurnAtRate(float Rate)
 void AMainCharacter::LookUpAtRate(float Rate)
 {
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+
+void AMainCharacter::DecrementHealth(float damage)
+{
+	if ( (health - damage) <= 0)
+	{
+		health -= damage;
+		Die();
+	}
+	health -= damage;
+}
+
+void AMainCharacter::Die()
+{
+	//TO FILL
+}
+
+void AMainCharacter::IncrementCoins(int32 coinValue)
+{
+	coins += coinValue;
 }
