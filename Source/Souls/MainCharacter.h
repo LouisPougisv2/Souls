@@ -6,6 +6,16 @@
 #include "GameFramework/Character.h"
 #include "MainCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EMovementStatus : uint8
+{
+	EMS_Normal UMETA(DisplayName = "Normal"),
+	EMS_Sprinting UMETA(DisplayName = "Sprinting"),
+
+	//not meant to be used, it's just kind of a default for the last one
+	EMS_MAX UMETA(DisplayName = "DefaultMAX"),
+};
+
 UCLASS()
 class SOULS_API AMainCharacter : public ACharacter
 {
@@ -14,6 +24,29 @@ class SOULS_API AMainCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AMainCharacter();
+	
+	/*.......................              Movement Status            ......................................*/
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Enums")
+	EMovementStatus MovementStatus;
+
+	//Set Movement Status and running speed
+	void SetMovementStatus(EMovementStatus status);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Running")
+	float runningSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Running")
+	float sprintingSpeed;
+
+	//Key to sprint
+	bool bShiftKeyDown;
+
+	//When the shift key is pressed down to enable sprinting
+	void StartSprinting();
+
+	//Released to stop sprinting
+	void StopSprinting();
 
 	/* Camera Boom positioning the camera behing the player*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))

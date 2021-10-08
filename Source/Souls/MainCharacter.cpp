@@ -50,6 +50,11 @@ AMainCharacter::AMainCharacter()
 	maxStamina = 350.0f;
 	stamina = 175.0f;
 	coins = 0;
+
+	runningSpeed = 60.0f;
+	sprintingSpeed = 95.0f;
+
+	bShiftKeyDown = false;
 }
 
 // Called when the game starts or when spawned
@@ -75,6 +80,9 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACharacter::StopJumping);
+	
+	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &AMainCharacter::StartSprinting);
+	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &AMainCharacter::StopSprinting);
 
 	//Movements for the character
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AMainCharacter::MoveForward);
@@ -144,4 +152,29 @@ void AMainCharacter::Die()
 void AMainCharacter::IncrementCoins(int32 coinValue)
 {
 	coins += coinValue;
+}
+
+void AMainCharacter::SetMovementStatus(EMovementStatus status)
+{
+	MovementStatus = status;	
+	if (MovementStatus == EMovementStatus::EMS_Sprinting)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = sprintingSpeed;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = runningSpeed;
+	}
+}
+
+
+void AMainCharacter::StartSprinting()
+{
+	bShiftKeyDown = true;
+}
+
+
+void AMainCharacter::StopSprinting()
+{
+	bShiftKeyDown = false;
 }
