@@ -47,14 +47,23 @@ AMainCharacter::AMainCharacter()
 
 	maxHealth = 100.0f;
 	health = 70.0f;
-	maxStamina = 350.0f;
-	stamina = 175.0f;
+	maxStamina = 150.0f;
+	stamina = 120.0f;
 	coins = 0;
 
-	runningSpeed = 60.0f;
-	sprintingSpeed = 95.0f;
+	//To refactor 
+	runningSpeed = 450.0f; 
+	sprintingSpeed = runningSpeed * 1.3f;
 
 	bShiftKeyDown = false;
+
+	//Initialize Enum
+	MovementStatus = EMovementStatus::EMS_Normal;
+	StaminaStatus = EStaminaStatus::ESS_Normal;
+
+	StaminaDrainRate = 25.0f;
+	StaminaMinToSprint = 50.0f;
+
 }
 
 // Called when the game starts or when spawned
@@ -69,6 +78,96 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	float deltaStamina = StaminaDrainRate * DeltaTime;
+
+	switch (StaminaStatus)
+	{
+	case EStaminaStatus::ESS_Normal :
+		if (bShiftKeyDown)
+		{
+			if (stamina - deltaStamina <= StaminaMinToSprint)
+			{
+				SetStaminaStatus(EStaminaStatus::ESS_BelowMinimum);
+				stamina -= deltaStamina;
+			}
+			else
+			{
+				stamina -= deltaStamina;
+			}
+			SetMovementStatus(EMovementStatus::EMS_Sprinting);
+		}
+		else //Shift Key up, we need to check if we replenish the stamina (not above the max stamina value)
+		{
+			if (stamina + deltaStamina >= maxStamina)
+			{
+				stamina = maxStamina;
+			}
+			else
+			{
+				stamina += deltaStamina;
+			}
+			SetMovementStatus(EMovementStatus::EMS_Normal); 
+		}
+		break;
+	case EStaminaStatus::ESS_BelowMinimum :
+		if (bShiftKeyDown)
+		{
+			if (stamina - deltaStamina <= 0.0f)
+			{
+				SetStaminaStatus(EStaminaStatus::ESS_Exhausted);
+				stamina = 0.0f;
+				SetMovementStatus(EMovementStatus::EMS_Normal);
+			}
+			else
+			{
+				stamina -= deltaStamina;
+				SetMovementStatus(EMovementStatus::EMS_Sprinting);
+			}
+		}
+		else //Shift Key up
+		{
+			if (stamina + deltaStamina >= StaminaMinToSprint)
+			{
+				SetStaminaStatus(EStaminaStatus::ESS_Normal);
+				stamina += deltaStamina;
+			}
+			else
+			{
+				stamina += deltaStamina;
+			}
+			SetMovementStatus(EMovementStatus::EMS_Normal);
+		}
+		break;
+	case EStaminaStatus::ESS_Exhausted:
+		if (bShiftKeyDown)
+		{
+			stamina = 0.0f;
+		}
+		else //Shift Key up
+		{
+			SetStaminaStatus(EStaminaStatus::ESS_ExhaustedRecovering);
+			stamina += deltaStamina;
+		}
+		SetMovementStatus(EMovementStatus::EMS_Normal);
+		break;
+
+	case EStaminaStatus::ESS_ExhaustedRecovering:
+
+		if (stamina + deltaStamina >= StaminaMinToSprint)
+		{
+			SetStaminaStatus(EStaminaStatus::ESS_Normal);
+			stamina += deltaStamina;
+		}
+		else
+		{
+			stamina += deltaStamina;
+		}
+		SetMovementStatus(EMovementStatus::EMS_Normal);
+		break;
+	
+	default:
+		;
+	}
 }
 
 // Called to bind functionality to input
