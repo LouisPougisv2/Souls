@@ -6,6 +6,27 @@
 #include "GameFramework/Character.h"
 #include "MainCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EMovementStatus : uint8
+{
+	EMS_Normal UMETA(DisplayName = "Normal"),
+	EMS_Sprinting UMETA(DisplayName = "Sprinting"),
+
+	//not meant to be used, it's just kind of a default for the last one
+	EMS_MAX UMETA(DisplayName = "DefaultMAX")
+};
+
+UENUM(BlueprintType)
+enum class EStaminaStatus : uint8
+{
+	ESS_Normal UMETA(DisplayName = "Normal"),
+	ESS_BelowMinimum UMETA(DisplayName = "BelowMinimum"),
+	ESS_Exhausted UMETA(DisplayName = "Exhausted"),
+	ESS_ExhaustedRecovering UMETA(DisplayName = "ExhaustedRecovering"),
+
+	ESS_MAX UMETA(DisplayName = "DefaultMAX")
+};
+
 UCLASS()
 class SOULS_API AMainCharacter : public ACharacter
 {
@@ -14,6 +35,42 @@ class SOULS_API AMainCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AMainCharacter();
+	
+	/*.......................              Movement Status            ......................................*/
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Enums")
+	EMovementStatus MovementStatus;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Enums")
+	EStaminaStatus StaminaStatus;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movements")
+	float StaminaDrainRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movements")
+	float StaminaMinToSprint;
+
+	FORCEINLINE void SetStaminaStatus(EStaminaStatus status) { StaminaStatus = status; }
+
+	void UseStamina(float deltaStamina);
+
+	//Set Movement Status and running speed
+	void SetMovementStatus(EMovementStatus status);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Running")
+	float runningSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Running")
+	float sprintingSpeed;
+
+	//Key to sprint
+	bool bShiftKeyDown;
+
+	//When the shift key is pressed down to enable sprinting
+	void StartSprinting();
+
+	//Released to stop sprinting
+	void StopSprinting();
 
 	/* Camera Boom positioning the camera behing the player*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -28,6 +85,29 @@ public:
 	float BaseTurnRate;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera);
 	float BaseLookUpRate;
+
+	/*.......................              Player Stats            ......................................*/
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,  Category = "Player Stats")
+	float maxHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
+	float health;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Stats")
+	float maxStamina;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
+	float stamina;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
+	int32 coins;
+
+	void DecrementHealth(float damage);
+
+	void Die();
+
+	void IncrementCoins(int32 coinValue);
 
 protected:
 	// Called when the game starts or when spawned

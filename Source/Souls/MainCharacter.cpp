@@ -45,6 +45,25 @@ AMainCharacter::AMainCharacter()
 	GetCharacterMovement()->JumpZVelocity = 650.0f; //Jump's velocity
 	GetCharacterMovement()->AirControl = 0.2f;
 
+	maxHealth = 100.0f;
+	health = 70.0f;
+	maxStamina = 150.0f;
+	stamina = 120.0f;
+	coins = 0;
+
+	//To refactor 
+	runningSpeed = 450.0f; 
+	sprintingSpeed = runningSpeed * 1.3f;
+
+	bShiftKeyDown = false;
+
+	//Initialize Enum
+	MovementStatus = EMovementStatus::EMS_Normal;
+	StaminaStatus = EStaminaStatus::ESS_Normal;
+
+	StaminaDrainRate = 25.0f;
+	StaminaMinToSprint = 50.0f;
+
 }
 
 // Called when the game starts or when spawned
@@ -59,6 +78,10 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	float deltaStamina = StaminaDrainRate * DeltaTime;
+
+	UseStamina(deltaStamina);
+
 }
 
 // Called to bind functionality to input
@@ -70,6 +93,9 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACharacter::StopJumping);
+	
+	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &AMainCharacter::StartSprinting);
+	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &AMainCharacter::StopSprinting);
 
 	//Movements for the character
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AMainCharacter::MoveForward);
@@ -118,4 +144,142 @@ void AMainCharacter::TurnAtRate(float Rate)
 void AMainCharacter::LookUpAtRate(float Rate)
 {
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+
+void AMainCharacter::DecrementHealth(float damage)
+{
+	if ( (health - damage) <= 0)
+	{
+		health -= damage;
+		Die();
+	}
+	health -= damage;
+}
+
+void AMainCharacter::Die()
+{
+	//TO FILL
+}
+
+void AMainCharacter::IncrementCoins(int32 coinValue)
+{
+	coins += coinValue;
+}
+
+void AMainCharacter::SetMovementStatus(EMovementStatus status)
+{
+	MovementStatus = status;	
+	if (MovementStatus == EMovementStatus::EMS_Sprinting)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = sprintingSpeed;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = runningSpeed;
+	}
+}
+
+
+void AMainCharacter::StartSprinting()
+{
+	bShiftKeyDown = true;
+}
+
+
+void AMainCharacter::StopSprinting()
+{
+	bShiftKeyDown = false;
+}
+
+void AMainCharacter::UseStamina(float deltaStamina) 
+{
+	switch (StaminaStatus)
+	{
+	case EStaminaStatus::ESS_Normal:
+		if (bShiftKeyDown)
+		{
+			if (stamina - deltaStamina <= StaminaMinToSprint)
+			{
+				SetStaminaStatus(EStaminaStatus::ESS_BelowMinimum);
+				stamina -= deltaStamina;
+			}
+			else
+			{
+				stamina -= deltaStamina;
+			}
+			SetMovementStatus(EMovementStatus::EMS_Sprinting);
+		}
+		else //Shift Key up, we need to check if we replenish the stamina (not above the max stamina value)
+		{
+			if (stamina + deltaStamina >= maxStamina)
+			{
+				stamina = maxStamina;
+			}
+			else
+			{
+				stamina += deltaStamina;
+			}
+			SetMovementStatus(EMovementStatus::EMS_Normal);
+		}
+		break;
+	case EStaminaStatus::ESS_BelowMinimum:
+		if (bShiftKeyDown)
+		{
+			if (stamina - deltaStamina <= 0.0f)
+			{
+				SetStaminaStatus(EStaminaStatus::ESS_Exhausted);
+				stamina = 0.0f;
+				SetMovementStatus(EMovementStatus::EMS_Normal);
+			}
+			else
+			{
+				stamina -= deltaStamina;
+				SetMovementStatus(EMovementStatus::EMS_Sprinting);
+			}
+		}
+		else //Shift Key up
+		{
+			if (stamina + deltaStamina >= StaminaMinToSprint)
+			{
+				SetStaminaStatus(EStaminaStatus::ESS_Normal);
+				stamina += deltaStamina;
+			}
+			else
+			{
+				stamina += deltaStamina;
+			}
+			SetMovementStatus(EMovementStatus::EMS_Normal);
+		}
+		break;
+	case EStaminaStatus::ESS_Exhausted:
+		if (bShiftKeyDown)
+		{
+			stamina = 0.0f;
+		}
+		else //Shift Key up
+		{
+			SetStaminaStatus(EStaminaStatus::ESS_ExhaustedRecovering);
+			stamina += deltaStamina;
+		}
+		SetMovementStatus(EMovementStatus::EMS_Normal);
+		break;
+
+	case EStaminaStatus::ESS_ExhaustedRecovering:
+
+		if (stamina + deltaStamina >= StaminaMinToSprint)
+		{
+			SetStaminaStatus(EStaminaStatus::ESS_Normal);
+			stamina += deltaStamina;
+		}
+		else
+		{
+			stamina += deltaStamina;
+		}
+		SetMovementStatus(EMovementStatus::EMS_Normal);
+		break;
+
+	default:
+		;
+	}
 }
