@@ -52,6 +52,8 @@ public:
 
 	FORCEINLINE void SetStaminaStatus(EStaminaStatus status) { StaminaStatus = status; }
 
+	void UseStamina(float deltaStamina);
+
 	//Set Movement Status and running speed
 	void SetMovementStatus(EMovementStatus status);
 
