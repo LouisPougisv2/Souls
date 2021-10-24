@@ -16,6 +16,15 @@ void APickupItems::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 
 	UE_LOG(LogTemp, Warning, TEXT("On Overlap Begin (PickupItems)"));
 
+	if (OtherActor)
+	{
+		AMainCharacter* mainCharacter = Cast<AMainCharacter>(OtherActor);
+		if (mainCharacter)
+		{
+			mainCharacter->IncrementCoins(coinValue);
+			mainCharacter->PickupLocations.Add(GetActorLocation());
+		}
+	}
 
 }
 
@@ -25,12 +34,4 @@ void APickupItems::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor
 
 	UE_LOG(LogTemp, Warning, TEXT("On Overlap End (PickupItems)"));
 
-	if (OtherActor)
-	{
-		AMainCharacter* mainCharacter = Cast<AMainCharacter>(OtherActor);
-		if (mainCharacter)
-		{
-			mainCharacter->IncrementCoins(coinValue);
-		}
-	}
 }

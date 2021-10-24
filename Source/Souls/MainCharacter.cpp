@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -281,5 +282,15 @@ void AMainCharacter::UseStamina(float deltaStamina)
 
 	default:
 		;
+	}
+}
+
+void AMainCharacter::ShowPickupLocation()
+{
+
+	for (auto location : PickupLocations)
+	{
+		//Draw Debug sphere where items have been picked up (for debug sphere tests only)
+		UKismetSystemLibrary::DrawDebugSphere(this, location, 25.f, 12, FLinearColor::Green, 20.0f, 0.5f);
 	}
 }

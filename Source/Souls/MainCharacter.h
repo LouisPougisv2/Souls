@@ -35,6 +35,12 @@ class SOULS_API AMainCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AMainCharacter();
+
+	//TArray used to try out the way they work
+	TArray<FVector> PickupLocations;
+
+	UFUNCTION(BlueprintCallable)
+	void ShowPickupLocation();
 	
 	/*.......................              Movement Status            ......................................*/
 
