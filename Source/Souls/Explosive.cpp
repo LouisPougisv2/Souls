@@ -22,6 +22,8 @@ void AExplosive::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 		{
 			mainCharacter->DecrementHealth(damage);
 			mainCharacter->PickupLocations.Add(GetActorLocation());
+
+			Destroy();
 		}
 	}
 }
