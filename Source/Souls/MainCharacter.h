@@ -111,7 +111,11 @@ public:
 
 	//EditDefaultsOnly because I don't want it to set it on each individual instance of  the character
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Items")
-	class AWeapon* EquipedWeapon;
+	class AWeapon* EquippedWeapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
+	class AItem* ActiveOverlappingItem;
+
 
 
 	void DecrementHealth(float damage);
@@ -147,9 +151,17 @@ public:
 */
 	void LookUpAtRate(float Rate);
 
+	bool bLMBDown;
+
+	void LMBDown();
+
+	void LMBUp();
+
+
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; };
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; };
 
-	FORCEINLINE void SetEquippedWeapon(AWeapon* WeaponToSet) { EquipedWeapon = WeaponToSet; };
+	FORCEINLINE void SetEquippedWeapon(AWeapon* WeaponToSet) { EquippedWeapon = WeaponToSet; };
+	FORCEINLINE void SetActiveOverlappingItem(AItem* Item) { ActiveOverlappingItem = Item;	  };
 
 };
