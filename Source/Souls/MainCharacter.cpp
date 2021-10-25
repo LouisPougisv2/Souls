@@ -319,3 +319,13 @@ void AMainCharacter::ShowPickupLocation()
 		UKismetSystemLibrary::DrawDebugSphere(this, location, 25.f, 12, FLinearColor::Green, 20.0f, 0.5f);
 	}
 }
+
+void AMainCharacter::SetEquippedWeapon(AWeapon* WeaponToSet)
+{ 
+//we need to destroy if there's a weapon already equipped before equipping a new one
+	if (EquippedWeapon)
+	{
+		GetEquippedWeapon()->Destroy();
+	}
+	EquippedWeapon = WeaponToSet; 
+}

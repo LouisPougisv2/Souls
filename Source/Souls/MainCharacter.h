@@ -109,7 +109,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
 	int32 coins;
 
-	//EditDefaultsOnly because I don't want it to set it on each individual instance of  the character
+	//EditDefaultsOnly because I don't want it to set it on each individual instance of the character
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Items")
 	class AWeapon* EquippedWeapon;
 
@@ -161,7 +161,8 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; };
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; };
 
-	FORCEINLINE void SetEquippedWeapon(AWeapon* WeaponToSet) { EquippedWeapon = WeaponToSet; };
+	void SetEquippedWeapon(AWeapon* WeaponToSet);
 	FORCEINLINE void SetActiveOverlappingItem(AItem* Item) { ActiveOverlappingItem = Item;	  };
+	FORCEINLINE AWeapon* GetEquippedWeapon() { return EquippedWeapon; };
 
 };

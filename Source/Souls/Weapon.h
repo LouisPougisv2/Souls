@@ -6,9 +6,14 @@
 #include "Item.h"
 #include "Weapon.generated.h"
 
-/**
- * 
- */
+UENUM (BlueprintType)
+enum class EWeaponState : uint8
+{
+	EWS_Pickup UMETA(DisplayName = "Pickup"),
+	EWS_Equipped UMETA(DisplayName = "Equipped"),
+
+	EWS_MAX UMETA(DisplayName = "DefaultMax")
+};
 UCLASS()
 class SOULS_API AWeapon : public AItem
 {
@@ -17,6 +22,8 @@ class SOULS_API AWeapon : public AItem
 public:
 
 	AWeapon();
+
+	EWeaponState WeaponState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item | Particles")
 	bool bWeaponParticles;
@@ -32,4 +39,14 @@ public:
 	virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
 	
 	void Equip(class AMainCharacter* character);
+
+	FORCEINLINE void SetWeaponState(EWeaponState newWeaponState)
+	{
+		WeaponState = newWeaponState;
+	}
+
+	FORCEINLINE EWeaponState GetWeaponState()
+	{
+		return WeaponState;
+	}
 };
