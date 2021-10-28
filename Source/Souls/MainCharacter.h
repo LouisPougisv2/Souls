@@ -116,7 +116,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
 	class AItem* ActiveOverlappingItem;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Anims")
+	bool bIsAttacking;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anims")
+	class UAnimMontage* CombatMontage;
 
+	void Attack();
 
 	void DecrementHealth(float damage);
 

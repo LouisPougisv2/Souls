@@ -6,6 +6,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Weapon.h"
 
@@ -66,6 +68,8 @@ AMainCharacter::AMainCharacter()
 
 	StaminaDrainRate = 25.0f;
 	StaminaMinToSprint = 50.0f;
+
+	bIsAttacking = false;
 
 }
 
@@ -165,6 +169,10 @@ void AMainCharacter::LMBDown()
 			SetActiveOverlappingItem(nullptr);
 		}
 	}
+	else if (EquippedWeapon)
+	{
+		Attack();
+	}
 }
 
 void AMainCharacter::LMBUp()
@@ -172,6 +180,17 @@ void AMainCharacter::LMBUp()
 	bLMBDown = false;
 }
 
+void AMainCharacter::Attack()
+{
+	bIsAttacking = true;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && CombatMontage)
+	{
+		AnimInstance->Montage_Play(CombatMontage, 1.35f);
+		AnimInstance->Montage_JumpToSection(FName("Attack1"), CombatMontage);
+	}
+}
 
 void AMainCharacter::DecrementHealth(float damage)
 {
