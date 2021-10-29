@@ -120,7 +120,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void AMainCharacter::MoveForward(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0))
+	if ((Controller != nullptr) && (Value != 0) && !bIsAttacking)
 	{
 		//the direction that the controller is facing
 		const FRotator rotation = Controller->GetControlRotation(); 
@@ -133,7 +133,7 @@ void AMainCharacter::MoveForward(float Value)
 }
 void AMainCharacter::MoveRight(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0))
+	if ((Controller != nullptr) && (Value != 0) && !bIsAttacking)
 	{
 		//the direction that the controller is facing
 		const FRotator rotation = Controller->GetControlRotation();
@@ -182,13 +182,26 @@ void AMainCharacter::LMBUp()
 
 void AMainCharacter::Attack()
 {
-	bIsAttacking = true;
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && CombatMontage)
+	if (!bIsAttacking)
 	{
-		AnimInstance->Montage_Play(CombatMontage, 1.35f);
-		AnimInstance->Montage_JumpToSection(FName("Attack1"), CombatMontage);
+		bIsAttacking = true;
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance && CombatMontage)
+		{
+			AnimInstance->Montage_Play(CombatMontage, 1.35f);
+			AnimInstance->Montage_JumpToSection(FName("Attack1"), CombatMontage);
+		}
+	}
+}
+
+//if LMB is still down, he player keeps on attacking
+void AMainCharacter::AttackEnd()
+{
+	bIsAttacking = false;
+	if (bLMBDown)
+	{
+		Attack();
 	}
 }
 

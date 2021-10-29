@@ -124,6 +124,9 @@ public:
 
 	void Attack();
 
+	UFUNCTION(BLueprintCallable)
+	void AttackEnd();
+
 	void DecrementHealth(float damage);
 
 	void Die();
