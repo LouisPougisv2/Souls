@@ -5,6 +5,8 @@
 #include "Components/SphereComponent.h"
 #include "AIController.h"
 #include "MainCharacter.h"
+#include "Kismet/KismetSystemLibrary.h"
+
 // Sets default values
 AEnemy::AEnemy()
 {
@@ -18,6 +20,8 @@ AEnemy::AEnemy()
 	CombatSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CombatSphere"));
 	CombatSphere->SetupAttachment(GetRootComponent());
 	CombatSphere->InitSphereRadius(75.0f);
+
+	bOverlappingCombatSphere = false;
 }
 
 // Called when the game starts or when spawned
@@ -64,17 +68,47 @@ void AEnemy::AgroSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, 
 
 void AEnemy::AgroSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AgroSphere On Overlap End (Super)"));
+	if (OtherActor)
+	{
+		AMainCharacter* MainCharacter = Cast<AMainCharacter>(OtherActor);
+		if (MainCharacter)
+		{
+			SetEnemyMovementStatus(EEnemyMovementStatus::EMS_Idle);
+		}
+	}
+	UE_LOG(LogTemp, Warning, TEXT("AgroSphere On Overlap End Worked"));
 }
 
 void AEnemy::CombatSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("CombatSphere On Overlap Begin (Super)"));
+	if (OtherActor)
+	{
+		AMainCharacter* MainCharacter = Cast<AMainCharacter>(OtherActor);
+		if (MainCharacter)
+		{
+			CombatTarget = MainCharacter;
+			bOverlappingCombatSphere = true;
+			SetEnemyMovementStatus(EEnemyMovementStatus::EMS_Attacking);
+		}
+	}
 }
 
 void AEnemy::CombatSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	UE_LOG(LogTemp, Warning, TEXT("CombatSphere  On Overlap End (Super)"));
+	if (OtherActor)
+	{
+		AMainCharacter* MainCharacter = Cast<AMainCharacter>(OtherActor);
+
+		if (MainCharacter)
+		{
+			bOverlappingCombatSphere = false;
+			if (EnemyMovementStatus != EEnemyMovementStatus::EMS_Attacking)
+			{
+				MoveToTarget(MainCharacter);
+				CombatTarget = nullptr;
+			}
+		}
+	}
 }
 
 void AEnemy::MoveToTarget(AMainCharacter* Target)
@@ -84,11 +118,23 @@ void AEnemy::MoveToTarget(AMainCharacter* Target)
 	{
 		FAIMoveRequest MoveRequest;
 		MoveRequest.SetGoalActor(Target);
-		MoveRequest.SetAcceptanceRadius(5.0f);
+		MoveRequest.SetAcceptanceRadius(10.0f);
 
 		FNavPathSharedPtr OutPath;
 
 		AIController->MoveTo(MoveRequest, &OutPath);
+
+		/*
+		//Will return a TArray of NavPathPoint
+		auto PathPoints = OutPath->GetPathPoints();
+		//draw debug sphere
+		for (auto points : PathPoints)
+		{
+			FVector Location = points.Location;
+			UKismetSystemLibrary::DrawDebugSphere(this, Location, 25.f, 12, FLinearColor::White, 20.0f, 0.5f);
+		}
+		*/
+
 	}
 }
 
