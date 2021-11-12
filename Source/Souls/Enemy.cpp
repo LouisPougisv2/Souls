@@ -6,6 +6,8 @@
 #include "AIController.h"
 #include "MainCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Particles/ParticleSystem.h"
+
 
 // Sets default values
 AEnemy::AEnemy()
@@ -20,8 +22,11 @@ AEnemy::AEnemy()
 	CombatSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CombatSphere"));
 	CombatSphere->SetupAttachment(GetRootComponent());
 	CombatSphere->InitSphereRadius(75.0f);
-
+	
 	bOverlappingCombatSphere = false;
+	health = 140.0f;
+	maxHealth = 150.0f;
+	damage = 20.0f;
 }
 
 // Called when the game starts or when spawned
@@ -76,7 +81,6 @@ void AEnemy::AgroSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AA
 			SetEnemyMovementStatus(EEnemyMovementStatus::EMS_Idle);
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("AgroSphere On Overlap End Worked"));
 }
 
 void AEnemy::CombatSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -118,7 +122,7 @@ void AEnemy::MoveToTarget(AMainCharacter* Target)
 	{
 		FAIMoveRequest MoveRequest;
 		MoveRequest.SetGoalActor(Target);
-		MoveRequest.SetAcceptanceRadius(10.0f);
+		MoveRequest.SetAcceptanceRadius(20.0f);
 
 		FNavPathSharedPtr OutPath;
 
@@ -138,3 +142,18 @@ void AEnemy::MoveToTarget(AMainCharacter* Target)
 	}
 }
 
+void AEnemy::DecrementHealth(float value)
+{
+	if ((health - value) <= 0)
+	{
+		health -= value;
+		Die();
+	}
+	health -= value;
+}
+
+void AEnemy::Die()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Enemy is dead"));
+
+}

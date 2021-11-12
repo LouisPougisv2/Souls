@@ -52,7 +52,7 @@ void AItem::Tick(float DeltaTime)
 
 void AItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("On Overlap Begin (Super)"));
+	//UE_LOG(LogTemp, Warning, TEXT("On Overlap Begin (Super)"));
 
 	//Spawn the particle
 	if (OverlapParticles)
@@ -68,5 +68,5 @@ void AItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 
 void AItem::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	UE_LOG(LogTemp, Warning, TEXT("On Overlap End (Super)"));
+	//UE_LOG(LogTemp, Warning, TEXT("On Overlap End (Super)"));
 }

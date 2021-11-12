@@ -45,6 +45,20 @@ public:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "AI")
 	AMainCharacter* CombatTarget;
 
+	/*.......................              Enemy Stats            ......................................*/
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Stats")
+	float health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Stats")
+	float maxHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Stats")
+	float damage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Stats")
+	class UParticleSystem* OnHitParticles;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -70,4 +84,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void MoveToTarget(class AMainCharacter* Target);
+
+	void DecrementHealth(float damage);
+
+	void Die();
 };

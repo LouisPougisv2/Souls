@@ -8,6 +8,9 @@
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
+#include "Enemy.h"
 
 
 AWeapon::AWeapon()
@@ -15,9 +18,24 @@ AWeapon::AWeapon()
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SkeletalMesh->SetupAttachment(GetRootComponent());
 
+	CombatCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CombatCollision"));
+	CombatCollisionBox->SetupAttachment(GetRootComponent());
+
 	bWeaponParticles = false;
+	Damage = 50.0f;
 
 	WeaponState = EWeaponState::EWS_Pickup;
+}
+
+void AWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//We need to bind this funcons to the OnComponentBeginOverlap
+	//So OverlapBegin & OverlpadEnd function can be called each time sometime
+	//Overlap with the Weapon Collision box
+	CombatCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::WeaponOverlapBegin);
+	CombatCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AWeapon::WeaponOverlapEnd);
 }
 
 void AWeapon::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -46,6 +64,39 @@ void AWeapon::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 		if (MainCharacter)
 		{
 			MainCharacter->SetActiveOverlappingItem(nullptr);
+		}
+	}
+}
+
+void AWeapon::WeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor)
+	{
+		AEnemy* Enemy = Cast<AEnemy>(OtherActor);
+		if (Enemy)
+		{
+			if (Enemy->OnHitParticles)
+			{
+				//To fix : Replace GetActorLocation to emit the particles at a beter location
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Enemy->OnHitParticles, GetActorLocation(), FRotator(0.0f), false);
+			}
+			UE_LOG(LogTemp, Warning, TEXT("Enemy is taking damage"));
+			Enemy->DecrementHealth(Damage);
+		}
+	}
+}
+
+void AWeapon::WeaponOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor)
+	{
+		AEnemy* Enemy = Cast<AEnemy>(OtherActor);
+		USphereComponent* EnemyBody = Cast<USphereComponent>(OverlappedComponent);
+		//We need to verify that the SphereComponent we're overlapping is the combat spehere, not the aggro one!!!!
+		if (Enemy && EnemyBody)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Weapon attack on overlap end"));
+			Enemy->DecrementHealth(Damage);
 		}
 	}
 }
