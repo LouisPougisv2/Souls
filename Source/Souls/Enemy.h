@@ -30,19 +30,19 @@ public:
 
 	FORCEINLINE void SetEnemyMovementStatus(EEnemyMovementStatus newStatus) { EnemyMovementStatus = newStatus;  }
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI | General")
 	class USphereComponent* AgroSphere;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI | General")
 	USphereComponent* CombatSphere;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI | General")
 	class AAIController* AIController;
 
-	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "AI")
+	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "AI | General")
 	bool bOverlappingCombatSphere;
 
-	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "AI")
+	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "AI | General")
 	AMainCharacter* CombatTarget;
 
 	/*.......................              Enemy Stats            ......................................*/

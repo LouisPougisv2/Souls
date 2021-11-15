@@ -56,6 +56,12 @@ public:
 	
 	void Equip(class AMainCharacter* character);
 
+	UFUNCTION(BlueprintCallable)
+	void ActivateCollision();
+
+	UFUNCTION(BlueprintCallable)
+	void DeactivateCollision();
+
 	FORCEINLINE void SetWeaponState(EWeaponState newWeaponState) {		WeaponState = newWeaponState;	}
 
 	FORCEINLINE EWeaponState GetWeaponState(){		return WeaponState;	}

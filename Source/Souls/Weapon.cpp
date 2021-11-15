@@ -11,6 +11,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Enemy.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 
 AWeapon::AWeapon()
@@ -36,6 +37,12 @@ void AWeapon::BeginPlay()
 	//Overlap with the Weapon Collision box
 	CombatCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::WeaponOverlapBegin);
 	CombatCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AWeapon::WeaponOverlapEnd);
+
+	//Collision is set to NoCollision so we wait for ActivateCollision() to have the behavours we're looking for
+	CombatCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CombatCollisionBox->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	CombatCollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	CombatCollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 }
 
 void AWeapon::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -77,8 +84,11 @@ void AWeapon::WeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
 		{
 			if (Enemy->OnHitParticles)
 			{
-				//To fix : Replace GetActorLocation to emit the particles at a beter location
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Enemy->OnHitParticles, GetActorLocation(), FRotator(0.0f), false);
+				const USkeletalMeshSocket* WeaponSocket = SkeletalMesh->GetSocketByName("WeaponSocket");
+				if (WeaponSocket)
+				{
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Enemy->OnHitParticles, WeaponSocket->GetSocketLocation(SkeletalMesh), FRotator(0.0f), false);
+				}
 			}
 			UE_LOG(LogTemp, Warning, TEXT("Enemy is taking damage"));
 			Enemy->DecrementHealth(Damage);
@@ -132,4 +142,16 @@ void AWeapon::Equip(AMainCharacter* character)
 			IdleParticlesComponent->Deactivate();
 		}
 	}
+}
+
+void AWeapon::ActivateCollision()
+{
+	CombatCollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+}
+
+void AWeapon::DeactivateCollision()
+{
+	CombatCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 }
