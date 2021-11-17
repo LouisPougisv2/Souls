@@ -59,6 +59,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Stats")
 	class UParticleSystem* OnHitParticles;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Sound")
+	class USoundCue* HitSound;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

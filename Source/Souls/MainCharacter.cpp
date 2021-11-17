@@ -10,6 +10,8 @@
 #include "Animation/AnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Weapon.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -205,6 +207,14 @@ void AMainCharacter::Attack()
 //			}
 		}
 	}
+}
+
+void AMainCharacter::PlayWeaponSwingSound()
+{
+		if (EquippedWeapon->SwingSound)
+		{
+			UGameplayStatics::PlaySound2D(this, EquippedWeapon->SwingSound);
+		}
 }
 
 //if LMB is still down, he player keeps on attacking

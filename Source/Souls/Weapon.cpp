@@ -90,7 +90,10 @@ void AWeapon::WeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
 					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Enemy->OnHitParticles, WeaponSocket->GetSocketLocation(SkeletalMesh), FRotator(0.0f), false);
 				}
 			}
-			UE_LOG(LogTemp, Warning, TEXT("Enemy is taking damage"));
+			if (Enemy->HitSound)
+			{
+				UGameplayStatics::PlaySound2D(this, Enemy->HitSound);
+			}
 			Enemy->DecrementHealth(Damage);
 		}
 	}

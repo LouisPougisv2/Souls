@@ -7,6 +7,8 @@
 #include "MainCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Particles/ParticleSystem.h"
+#include "Sound/SoundCue.h"
+
 
 
 // Sets default values

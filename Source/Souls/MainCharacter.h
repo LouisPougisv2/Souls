@@ -124,6 +124,9 @@ public:
 
 	void Attack();
 
+	UFUNCTION(BlueprintCallable)
+	void PlayWeaponSwingSound();
+
 	UFUNCTION(BLueprintCallable)
 	void AttackEnd();
 
