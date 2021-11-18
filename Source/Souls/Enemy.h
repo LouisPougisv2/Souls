@@ -45,6 +45,9 @@ public:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "AI | General")
 	AMainCharacter* CombatTarget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Sound")
+	class USoundCue* SwingSound;
+
 	/*.......................              Enemy Stats            ......................................*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Stats")
@@ -61,6 +64,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Sound")
 	class USoundCue* HitSound;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI | Combat")
+	class UBoxComponent* CombatCollisionBox;
+
+	//to make sure that we're actually paying the combat anim montage
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	class UAnimMontage* CombatMontage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bIsAttacking;
 
 protected:
 	// Called when the game starts or when spawned
@@ -85,10 +98,29 @@ public:
 	UFUNCTION()
 	virtual void CombatSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	//OnOverlap functions for the weapon collision
+	UFUNCTION()
+	void ClawOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION()
+	void ClawOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 	UFUNCTION(BlueprintCallable)
 	void MoveToTarget(class AMainCharacter* Target);
+
+	UFUNCTION(BlueprintCallable)
+	void ActivateCollision();
+
+	UFUNCTION(BlueprintCallable)
+	void DeactivateCollision();
+
+	UFUNCTION(BlueprintCallable)
+	void AttackEnd();
+
+	void Attack();
 
 	void DecrementHealth(float damage);
 
 	void Die();
+
 };

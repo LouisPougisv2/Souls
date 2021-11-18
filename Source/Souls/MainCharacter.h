@@ -122,6 +122,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anims")
 	class UAnimMontage* CombatMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat | Stats")
+	class UParticleSystem* OnHitParticles;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat | Sound")
+	class USoundCue* HitSound;
+
 	void Attack();
 
 	UFUNCTION(BlueprintCallable)

@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Weapon.h"
 #include "Sound/SoundCue.h"
+#include "Particles/ParticleSystem.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
