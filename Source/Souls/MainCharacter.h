@@ -56,6 +56,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movements")
 	float StaminaMinToSprint;
 
+	//Method and member for avoiding to aim before attacking
+	float InterpolationSpeed;
+
+	bool bIsInterpolatingToEnemy;
+
+	void SetIsInterpolatingToEnemy(bool value) { bIsInterpolatingToEnemy = value; }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	class AEnemy* CombatTarget;
+
+	FORCEINLINE void SetCombatTarget(AEnemy* NewTarget) { CombatTarget = NewTarget; }
+
+
+	FRotator GetLookAtRotationYaw(FVector TargetLocation);
+
+	//------------------------------------------------------
 	FORCEINLINE void SetStaminaStatus(EStaminaStatus status) { StaminaStatus = status; }
 
 	void UseStamina(float deltaStamina);

@@ -13,6 +13,8 @@
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Enemy.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -74,6 +76,9 @@ AMainCharacter::AMainCharacter()
 
 	bIsAttacking = false;
 
+	InterpolationSpeed = 15.0f;
+	bIsInterpolatingToEnemy = false;
+
 }
 
 // Called when the game starts or when spawned
@@ -92,6 +97,24 @@ void AMainCharacter::Tick(float DeltaTime)
 
 	UseStamina(deltaStamina);
 
+	if (bIsInterpolatingToEnemy && CombatTarget)
+	{
+		//Destination for our rotation
+		FRotator LookAtYaw = GetLookAtRotationYaw(CombatTarget->GetActorLocation());
+		//Next line gives us the correct rotation for the frame
+		FRotator InterpolationRotation = FMath::RInterpTo(GetActorRotation(), LookAtYaw, DeltaTime, InterpolationSpeed);
+		SetActorRotation(InterpolationRotation);
+
+	}
+
+}
+
+FRotator AMainCharacter::GetLookAtRotationYaw(FVector TargetLocation)
+{
+	//FindLookAtRotation is coming from the UKismetMath library
+	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetLocation);
+	FRotator LookAtRotationYaw(0.0f, LookAtRotation.Yaw, 0.0f);
+	return LookAtRotationYaw;
 }
 
 // Called to bind functionality to input
@@ -188,6 +211,7 @@ void AMainCharacter::Attack()
 	if (!bIsAttacking)
 	{
 		bIsAttacking = true;
+		SetIsInterpolatingToEnemy(true);
 
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance && CombatMontage)
@@ -222,6 +246,7 @@ void AMainCharacter::PlayWeaponSwingSound()
 void AMainCharacter::AttackEnd()
 {
 	bIsAttacking = false;
+	SetIsInterpolatingToEnemy(false);
 	if (bLMBDown)
 	{
 		Attack();
@@ -273,7 +298,7 @@ void AMainCharacter::StopSprinting()
 	bShiftKeyDown = false;
 }
 
-void AMainCharacter::UseStamina(float deltaStamina) 
+void AMainCharacter::UseStamina(float deltaStamina)
 {
 	switch (StaminaStatus)
 	{
