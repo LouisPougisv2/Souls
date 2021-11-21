@@ -13,6 +13,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Animation/AnimInstance.h"
+#include "TimerManager.h"
 
 
 
@@ -39,6 +40,9 @@ AEnemy::AEnemy()
 	damage = 20.0f;
 	
 	bIsAttacking = false;
+
+	AttackMinTime = 0.5f;
+	AttackMaxTime = 2.5f;
 }
 
 // Called when the game starts or when spawned
@@ -135,6 +139,8 @@ void AEnemy::CombatSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, 
 				MoveToTarget(MainCharacter);
 				CombatTarget = nullptr;
 			}
+			//if the timer (between 2 attacks) is running, the next line will reset/clear it
+			GetWorldTimerManager().ClearTimer(TimerAttack);
 		}
 	}
 }
@@ -238,7 +244,9 @@ void AEnemy::AttackEnd()
 
 	if (bOverlappingCombatSphere)
 	{
-		Attack();
+		float AttackTime = FMath::FRandRange(AttackMinTime, AttackMaxTime);
+		//Set the world timer manager with the attacktime befor executing the attack function
+		GetWorldTimerManager().SetTimer(TimerAttack, this, &AEnemy::Attack, AttackTime);
 	}
 }
 
