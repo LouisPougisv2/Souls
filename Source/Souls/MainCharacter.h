@@ -144,6 +144,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat | Sound")
 	class USoundCue* HitSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TSubclassOf<UDamageType> DamageTypeClass;
+
 	void Attack();
 
 	UFUNCTION(BlueprintCallable)
@@ -154,6 +157,8 @@ public:
 
 	void DecrementHealth(float damage);
 
+	virtual float TakeDamage(float DamageAmount,	struct FDamageEvent const& DamageEvent,	class AController* EventInstigator, AActor* DamageCauser) override;
+	
 	void Die();
 
 	void IncrementCoins(int32 coinValue);

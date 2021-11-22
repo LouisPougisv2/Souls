@@ -94,7 +94,11 @@ void AWeapon::WeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
 			{
 				UGameplayStatics::PlaySound2D(this, Enemy->HitSound);
 			}
-			Enemy->DecrementHealth(Damage);
+			//Enemy->DecrementHealth(Damage);
+			if (DamageTypeClass)
+			{
+				UGameplayStatics::ApplyDamage(Enemy, Damage, WeaponInstigator, this, DamageTypeClass);
+			}
 		}
 	}
 }
@@ -118,6 +122,8 @@ void AWeapon::Equip(AMainCharacter* character)
 {
 	if (character)
 	{
+
+		SetInstigator(character->GetController());
 		//Set collision to ignore for the camera so the camera doesn't zoom in on the player if the sword 
 		//gets between the character and the camera
 		SkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);

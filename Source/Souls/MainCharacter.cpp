@@ -263,9 +263,27 @@ void AMainCharacter::DecrementHealth(float damage)
 	health -= damage;
 }
 
+float AMainCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	DecrementHealth(DamageAmount);
+	return DamageAmount;
+}
+
 void AMainCharacter::Die()
 {
-	//TO FILL
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && CombatMontage)
+	{
+		AnimInstance->Montage_Play(CombatMontage, 1.0f);
+		AnimInstance->Montage_JumpToSection(FName("Death"), CombatMontage);
+	}
+	AController* MainCharacterController = GetController();
+	if (MainCharacterController)
+	{
+		MainCharacterController->StopMovement();
+	}
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AMainCharacter::IncrementCoins(int32 coinValue)
