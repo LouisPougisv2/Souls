@@ -15,6 +15,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Enemy.h"
+#include "MainPlayerController.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -75,6 +76,7 @@ AMainCharacter::AMainCharacter()
 	StaminaMinToSprint = 50.0f;
 
 	bIsAttacking = false;
+	bHasCombatTarget = false;
 
 	InterpolationSpeed = 15.0f;
 	bIsInterpolatingToEnemy = false;
@@ -85,13 +87,17 @@ AMainCharacter::AMainCharacter()
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	//Next is put in begin play because we want to be sure to actually have our controller set before trying to set this variable value
+	MainPlayerController = Cast<AMainPlayerController>(GetController());
 }
 
 // Called every frame
 void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (MovementStatus == EMovementStatus::EMS_Dead) return;
 
 	float deltaStamina = StaminaDrainRate * DeltaTime;
 
@@ -106,7 +112,16 @@ void AMainCharacter::Tick(float DeltaTime)
 		SetActorRotation(InterpolationRotation);
 
 	}
-	//   
+	
+	if (CombatTarget)
+	{
+		CombatTargetLocation = CombatTarget->GetActorLocation();
+		if (MainPlayerController)
+		{
+			//update the enemy location in the MainPlayerController
+			MainPlayerController->EnemyLocation = CombatTargetLocation;
+		}
+	}
 }
 
 FRotator AMainCharacter::GetLookAtRotationYaw(FVector TargetLocation)
@@ -124,7 +139,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	check(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AMainCharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACharacter::StopJumping);
 	
 	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &AMainCharacter::StartSprinting);
@@ -146,7 +161,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void AMainCharacter::MoveForward(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0) && !bIsAttacking)
+	if ((Controller != nullptr) && (Value != 0) && !bIsAttacking && (MovementStatus != EMovementStatus::EMS_Dead))
 	{
 		//the direction that the controller is facing
 		const FRotator rotation = Controller->GetControlRotation(); 
@@ -159,7 +174,7 @@ void AMainCharacter::MoveForward(float Value)
 }
 void AMainCharacter::MoveRight(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0) && !bIsAttacking)
+	if ((Controller != nullptr) && (Value != 0) && !bIsAttacking && (MovementStatus != EMovementStatus::EMS_Dead))
 	{
 		//the direction that the controller is facing
 		const FRotator rotation = Controller->GetControlRotation();
@@ -186,6 +201,9 @@ void AMainCharacter::LMBDown()
 {
 	bLMBDown = true;
 
+	//If we're dead, we don't want to be able to pick up weapon nor attack
+	if (MovementStatus == EMovementStatus::EMS_Dead) return;
+
 	if (ActiveOverlappingItem)
 	{
 		AWeapon* Weapon = Cast<AWeapon>(ActiveOverlappingItem);
@@ -208,7 +226,7 @@ void AMainCharacter::LMBUp()
 
 void AMainCharacter::Attack()
 {
-	if (!bIsAttacking)
+	if (!bIsAttacking && (MovementStatus != EMovementStatus::EMS_Dead))
 	{
 		bIsAttacking = true;
 		SetIsInterpolatingToEnemy(true);
@@ -255,35 +273,56 @@ void AMainCharacter::AttackEnd()
 
 void AMainCharacter::DecrementHealth(float damage)
 {
-	if ( (health - damage) <= 0)
-	{
-		health -= damage;
-		Die();
-	}
-	health -= damage;
+//
 }
 
 float AMainCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	DecrementHealth(DamageAmount);
+	if ((health - DamageAmount) <= 0)
+	{
+		health -= DamageAmount;
+		Die();
+
+		if (DamageCauser)
+		{
+			// the enemy will have this boolean that will be set to false whenever the character dies
+			AEnemy* Enemy = Cast<AEnemy>(DamageCauser);
+			if (Enemy)
+			{
+				Enemy->bHasValidTarget = false;
+			}
+		}
+	}
+	health -= DamageAmount;
+
+
 	return DamageAmount;
 }
 
 void AMainCharacter::Die()
 {
+	if (MovementStatus == EMovementStatus::EMS_Dead) return;
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && CombatMontage)
 	{
 		AnimInstance->Montage_Play(CombatMontage, 1.0f);
 		AnimInstance->Montage_JumpToSection(FName("Death"), CombatMontage);
 	}
-	AController* MainCharacterController = GetController();
-	if (MainCharacterController)
-	{
-		MainCharacterController->StopMovement();
-	}
+	SetMovementStatus(EMovementStatus::EMS_Dead);
+}
 
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+void AMainCharacter::Jump()
+{
+	if (MovementStatus != EMovementStatus::EMS_Dead)
+	{
+		ACharacter::Jump();
+	}
+}
+
+void AMainCharacter::DeathEnd()
+{
+	GetMesh()->bPauseAnims = true;
+	GetMesh()->bNoSkeletonUpdate = true;
 }
 
 void AMainCharacter::IncrementCoins(int32 coinValue)

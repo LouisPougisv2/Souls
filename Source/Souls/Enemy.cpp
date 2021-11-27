@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "AIController.h"
 #include "MainCharacter.h"
+#include "MainPlayerController.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundCue.h"
@@ -41,11 +42,14 @@ AEnemy::AEnemy()
 	damage = 20.0f;
 	
 	bIsAttacking = false;
+	bHasValidTarget = false;
 
 	AttackMinTime = 0.5f;
 	AttackMaxTime = 2.5f;
 
 	EnemyMovementStatus = EEnemyMovementStatus::EMS_Idle;
+
+	DeathDelay = 2.0f;
 }
 
 // Called when the game starts or when spawned
@@ -107,7 +111,21 @@ void AEnemy::AgroSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AA
 		AMainCharacter* MainCharacter = Cast<AMainCharacter>(OtherActor);
 		if (MainCharacter)
 		{
+			bHasValidTarget = false;
+			if (MainCharacter->CombatTarget == this)
+			{
+				MainCharacter->SetCombatTarget(nullptr);
+			}
+			MainCharacter->bHasCombatTarget = false;
+			if(MainCharacter->MainPlayerController)
+			{
+				MainCharacter->MainPlayerController->HideEnemyHealthBar();
+			}
 			SetEnemyMovementStatus(EEnemyMovementStatus::EMS_Idle);
+			if (AIController)
+			{
+				AIController->StopMovement();
+			}
 		}
 	}
 }
@@ -119,8 +137,14 @@ void AEnemy::CombatSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 		AMainCharacter* MainCharacter = Cast<AMainCharacter>(OtherActor);
 		if (MainCharacter)
 		{
-			CombatTarget = MainCharacter;
+			bHasValidTarget = true;
 			MainCharacter->SetCombatTarget(this);
+			MainCharacter->bHasCombatTarget = true;
+			if (MainCharacter->MainPlayerController)
+			{
+				MainCharacter->MainPlayerController->DisplayEnemyHealthBar();
+			}
+			CombatTarget = MainCharacter;
 			bOverlappingCombatSphere = true;
 			Attack();
 		}
@@ -135,19 +159,21 @@ void AEnemy::CombatSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, 
 
 		if (MainCharacter)
 		{
-			if (MainCharacter->CombatTarget == this)
+			if(MainCharacter->CombatTarget == this)
 			{
+				MainCharacter->bHasCombatTarget = false;
 				MainCharacter->SetCombatTarget(nullptr);
 			}
-			bOverlappingCombatSphere = false;
-			if (EnemyMovementStatus != EEnemyMovementStatus::EMS_Attacking)
-			{
+			bOverlappingCombatSphere = false;		
+			if(EnemyMovementStatus != EEnemyMovementStatus::EMS_Attacking)
+			{ 
 				MoveToTarget(MainCharacter);
 				CombatTarget = nullptr;
 			}
+
 			//if the timer (between 2 attacks) is running, the next line will reset/clear it
 			GetWorldTimerManager().ClearTimer(TimerAttack);
-		}
+		}	
 	}
 }
 
@@ -228,13 +254,12 @@ void AEnemy::DeactivateCollision()
 
 void AEnemy::Attack()
 {
-	if (isAlive())
+	if (isAlive() && bHasValidTarget )
 	{
 		if (AIController)
 		{
 			AIController->StopMovement();
 			SetEnemyMovementStatus(EEnemyMovementStatus::EMS_Attacking);
-
 		}
 		if (!bIsAttacking)
 		{
@@ -293,10 +318,19 @@ void AEnemy::Die()
 	AgroSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CombatSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	//Set bHasCombatTarget to false????????
 }
 
 void AEnemy::DeathEnd()
 {
 	GetMesh()->bPauseAnims = true;
 	GetMesh()->bNoSkeletonUpdate = true;
+	
+	GetWorldTimerManager().SetTimer(DeathTimer, this, &AEnemy::Disappear, DeathDelay);
+}
+
+void AEnemy::Disappear()
+{
+	Destroy();
 }

@@ -11,6 +11,7 @@ enum class EMovementStatus : uint8
 {
 	EMS_Normal UMETA(DisplayName = "Normal"),
 	EMS_Sprinting UMETA(DisplayName = "Sprinting"),
+	EMS_Dead UMETA(DisplayName = "Dead"),
 
 	//not meant to be used, it's just kind of a default for the last one
 	EMS_MAX UMETA(DisplayName = "DefaultMAX")
@@ -63,10 +64,19 @@ public:
 
 	void SetIsInterpolatingToEnemy(bool value) { bIsInterpolatingToEnemy = value; }
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	class AEnemy* CombatTarget;
 
 	FORCEINLINE void SetCombatTarget(AEnemy* NewTarget) { CombatTarget = NewTarget; }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+	bool bHasCombatTarget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+	FVector CombatTargetLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Controller")
+	class AMainPlayerController* MainPlayerController;
 
 
 	FRotator GetLookAtRotationYaw(FVector TargetLocation);
@@ -160,6 +170,11 @@ public:
 	virtual float TakeDamage(float DamageAmount,	struct FDamageEvent const& DamageEvent,	class AController* EventInstigator, AActor* DamageCauser) override;
 	
 	void Die();
+
+	virtual void Jump() override;
+
+	UFUNCTION(BlueprintCallable)
+	void DeathEnd();
 
 	void IncrementCoins(int32 coinValue);
 

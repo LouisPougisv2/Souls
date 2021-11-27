@@ -41,12 +41,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI | General")
 	class AAIController* AIController;
 
-	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "AI | General")
+	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "Combat")
 	bool bOverlappingCombatSphere;
 
-	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "AI | General")
+	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "Combat")
 	AMainCharacter* CombatTarget;
 
+	bool bHasValidTarget; 
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI | Sound")
 	class USoundCue* SwingSound;
 
@@ -88,6 +90,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	TSubclassOf<UDamageType> DamageTypeClass;
+
+
+	FTimerHandle DeathTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float DeathDelay;
 
 protected:
 	// Called when the game starts or when spawned
@@ -144,5 +152,7 @@ public:
 	void DeathEnd();
 
 	const bool isAlive() { return GetEnemyMovementStatus() != EEnemyMovementStatus::EMS_Dead; }
+
+	void Disappear();
 
 };
