@@ -194,6 +194,10 @@ public:
 	//Call for side to side inpout
 	void MoveRight(float Value);
 
+	bool bIsMovingForward;
+
+	bool bIsMovingRight;
+
 	/*Called via input to turn at a giving rate
 	@param Rate this is normalized rate, i.e 1.0f means 100% of desired turned rate
 	*/

@@ -77,6 +77,8 @@ AMainCharacter::AMainCharacter()
 
 	bIsAttacking = false;
 	bHasCombatTarget = false;
+	bIsMovingForward = false;
+	bIsMovingRight = false;
 
 	InterpolationSpeed = 15.0f;
 	bIsInterpolatingToEnemy = false;
@@ -161,6 +163,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void AMainCharacter::MoveForward(float Value)
 {
+	//set to false at everyfraame in that sense, the bool will only be equal to true if the key is pressed
+	bIsMovingForward = false;
 	if ((Controller != nullptr) && (Value != 0) && !bIsAttacking && (MovementStatus != EMovementStatus::EMS_Dead))
 	{
 		//the direction that the controller is facing
@@ -170,10 +174,12 @@ void AMainCharacter::MoveForward(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
 		AddMovementInput(Direction, Value);
+		bIsMovingForward = true;
 	}
 }
 void AMainCharacter::MoveRight(float Value)
 {
+	bIsMovingRight = false;
 	if ((Controller != nullptr) && (Value != 0) && !bIsAttacking && (MovementStatus != EMovementStatus::EMS_Dead))
 	{
 		//the direction that the controller is facing
@@ -183,6 +189,7 @@ void AMainCharacter::MoveRight(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		AddMovementInput(Direction, Value);
+		bIsMovingRight = true;
 	}
 }
 
@@ -346,7 +353,10 @@ void AMainCharacter::SetMovementStatus(EMovementStatus status)
 
 void AMainCharacter::StartSprinting()
 {
-	bShiftKeyDown = true;
+	if (bIsMovingForward || bIsMovingRight)
+	{
+		bShiftKeyDown = true;
+	}
 }
 
 
