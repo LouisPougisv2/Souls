@@ -35,7 +35,8 @@ void AExplosive::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 				UGameplayStatics::PlaySound2D(this, OverlapSound);
 			}
 
-			mainCharacter->DecrementHealth(damage);
+			//GetFirstPlayerController works perfectly only because we're on a PvP game, otherwise it would become a pbm
+			UGameplayStatics::ApplyDamage(mainCharacter, damage, GetWorld()->GetFirstPlayerController(), this, DamageTypeClass);
 			mainCharacter->PickupLocations.Add(GetActorLocation());
 
 			Destroy();
