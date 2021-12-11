@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "Engine/World.h"
+#include "Enemy.h"
 
 
 
@@ -22,7 +23,8 @@ void AExplosive::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 	if (OtherActor)
 	{
 		AMainCharacter* mainCharacter = Cast<AMainCharacter>(OtherActor);
-		if (mainCharacter)
+		AEnemy* enemy = Cast<AEnemy>(OtherActor);
+		if (mainCharacter || enemy)
 		{
 			//Spawn the particle
 			if (OverlapParticles)
@@ -36,8 +38,7 @@ void AExplosive::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 			}
 
 			//GetFirstPlayerController works perfectly only because we're on a PvP game, otherwise it would become a pbm
-			UGameplayStatics::ApplyDamage(mainCharacter, damage, GetWorld()->GetFirstPlayerController(), this, DamageTypeClass);
-			mainCharacter->PickupLocations.Add(GetActorLocation());
+			UGameplayStatics::ApplyDamage(OtherActor, damage, nullptr, this, DamageTypeClass);
 
 			Destroy();
 		}
