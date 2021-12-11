@@ -34,7 +34,8 @@ AEnemy::AEnemy()
 	CombatSphere->InitSphereRadius(100.0f);
 
 	CombatCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CombatCollision"));
-	CombatCollisionBox->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName("FrontLeftClawSocket"));
+	CombatCollisionBox->SetupAttachment(GetMesh(), FName("FrontLeftSocket"));
+	//CombatCollisionBox->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName("FrontLeftClawSocket"));
 	
 	bOverlappingCombatSphere = false;
 	health = 140.0f;
@@ -186,7 +187,7 @@ void AEnemy::ClawOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 		{
 			if (MainCharacter->OnHitParticles)
 			{
-				const USkeletalMeshSocket* ClawSocket = GetMesh()->GetSocketByName("TipLeftClawSocket");
+				const USkeletalMeshSocket* ClawSocket = GetMesh()->GetSocketByName("TipLeftSocket");
 				if (ClawSocket)
 				{
 					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MainCharacter->OnHitParticles, ClawSocket->GetSocketLocation(GetMesh()), FRotator(0.0f), false);
