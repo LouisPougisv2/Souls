@@ -11,6 +11,7 @@ enum class EMovementStatus : uint8
 {
 	EMS_Normal UMETA(DisplayName = "Normal"),
 	EMS_Sprinting UMETA(DisplayName = "Sprinting"),
+	EMS_Dead UMETA(DisplayName = "Dead"),
 
 	//not meant to be used, it's just kind of a default for the last one
 	EMS_MAX UMETA(DisplayName = "DefaultMAX")
@@ -35,6 +36,12 @@ class SOULS_API AMainCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AMainCharacter();
+
+	//TArray used to try out the way they work
+	TArray<FVector> PickupLocations;
+
+	UFUNCTION(BlueprintCallable)
+	void ShowPickupLocation();
 	
 	/*.......................              Movement Status            ......................................*/
 
@@ -50,6 +57,31 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movements")
 	float StaminaMinToSprint;
 
+	//Method and member for avoiding to aim before attacking
+	float InterpolationSpeed;
+
+	bool bIsInterpolatingToEnemy;
+
+	void SetIsInterpolatingToEnemy(bool value) { bIsInterpolatingToEnemy = value; }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+	class AEnemy* CombatTarget;
+
+	FORCEINLINE void SetCombatTarget(AEnemy* NewTarget) { CombatTarget = NewTarget; }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+	bool bHasCombatTarget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+	FVector CombatTargetLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Controller")
+	class AMainPlayerController* MainPlayerController;
+
+
+	FRotator GetLookAtRotationYaw(FVector TargetLocation);
+
+	//------------------------------------------------------
 	FORCEINLINE void SetStaminaStatus(EStaminaStatus status) { StaminaStatus = status; }
 
 	void UseStamina(float deltaStamina);
@@ -103,9 +135,46 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
 	int32 coins;
 
+	//EditDefaultsOnly because I don't want it to set it on each individual instance of the character
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Items")
+	class AWeapon* EquippedWeapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
+	class AItem* ActiveOverlappingItem;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Anims")
+	bool bIsAttacking;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anims")
+	class UAnimMontage* CombatMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat | Stats")
+	class UParticleSystem* OnHitParticles;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat | Sound")
+	class USoundCue* HitSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TSubclassOf<UDamageType> DamageTypeClass;
+
+	void Attack();
+
+	UFUNCTION(BlueprintCallable)
+	void PlayWeaponSwingSound();
+
+	UFUNCTION(BLueprintCallable)
+	void AttackEnd();
+
 	void DecrementHealth(float damage);
 
+	virtual float TakeDamage(float DamageAmount,	struct FDamageEvent const& DamageEvent,	class AController* EventInstigator, AActor* DamageCauser) override;
+	
 	void Die();
+
+	virtual void Jump() override;
+
+	UFUNCTION(BlueprintCallable)
+	void DeathEnd();
 
 	void IncrementCoins(int32 coinValue);
 
@@ -125,6 +194,10 @@ public:
 	//Call for side to side inpout
 	void MoveRight(float Value);
 
+	bool bIsMovingForward;
+
+	bool bIsMovingRight;
+
 	/*Called via input to turn at a giving rate
 	@param Rate this is normalized rate, i.e 1.0f means 100% of desired turned rate
 	*/
@@ -136,7 +209,18 @@ public:
 */
 	void LookUpAtRate(float Rate);
 
+	bool bLMBDown;
+
+	void LMBDown();
+
+	void LMBUp();
+
+
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; };
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; };
+
+	void SetEquippedWeapon(AWeapon* WeaponToSet);
+	FORCEINLINE void SetActiveOverlappingItem(AItem* Item) { ActiveOverlappingItem = Item;	  };
+	FORCEINLINE AWeapon* GetEquippedWeapon() { return EquippedWeapon; };
 
 };
