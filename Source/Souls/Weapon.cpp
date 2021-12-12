@@ -105,17 +105,7 @@ void AWeapon::WeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
 
 void AWeapon::WeaponOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor)
-	{
-		AEnemy* Enemy = Cast<AEnemy>(OtherActor);
-		USphereComponent* EnemyBody = Cast<USphereComponent>(OverlappedComponent);
-		//We need to verify that the SphereComponent we're overlapping is the combat spehere, not the aggro one!!!!
-		if (Enemy && EnemyBody)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Weapon attack on overlap end"));
-			Enemy->DecrementHealth(Damage);
-		}
-	}
+
 }
 
 void AWeapon::Equip(AMainCharacter* character)

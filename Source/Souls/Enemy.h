@@ -141,11 +141,9 @@ public:
 
 	void Attack();
 
-	void DecrementHealth(float damage);
-
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	void Die();
+	void Die(AActor* Killer);
 
 	//Function call from the blueprint from the animNotify
 	UFUNCTION(BlueprintCallable)

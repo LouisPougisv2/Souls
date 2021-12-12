@@ -337,6 +337,53 @@ void AMainCharacter::IncrementCoins(int32 coinValue)
 	coins += coinValue;
 }
 
+void AMainCharacter::UpdateCombatTarget()
+{
+	TArray<AActor*> OverlappingActors;
+	//fill OverlappingActors with the enemy overlapping with the player
+	GetOverlappingActors(OverlappingActors, EnemyFilter);
+
+	if (OverlappingActors.Num() == 0)
+	{
+		//if there's no other enemy overlapping, we want to remove the enemy health bar widget from the viewport
+		if (MainPlayerController)
+		{
+			MainPlayerController->HideEnemyHealthBar();
+		}
+		return;
+	}
+
+	//We're assuming that the first enemy in the array is the closest
+	AEnemy* ClosestEnemy = Cast<AEnemy>(OverlappingActors[0]);
+
+	if (ClosestEnemy)
+	{
+		//to reduce the number of calls to the GetActorLocation function
+		FVector Location = GetActorLocation();
+		float DistanceToClosestEnemy = (ClosestEnemy->GetActorLocation() - Location).Size();
+
+		for (auto Actor : OverlappingActors)
+		{
+			AEnemy* Enemy = Cast<AEnemy>(Actor);
+			if (Enemy)
+			{
+				float DistanceToActor = (Enemy->GetActorLocation() - Location).Size();
+				if (DistanceToActor < DistanceToClosestEnemy)
+				{
+					DistanceToClosestEnemy = DistanceToActor;
+					ClosestEnemy = Enemy;
+				}
+			}
+		}
+		if (MainPlayerController)
+		{
+			MainPlayerController->DisplayEnemyHealthBar();
+		}
+		SetCombatTarget(ClosestEnemy);
+		bHasCombatTarget = true;
+	}
+}
+
 void AMainCharacter::SetMovementStatus(EMovementStatus status)
 {
 	MovementStatus = status;	

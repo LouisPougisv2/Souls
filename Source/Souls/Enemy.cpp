@@ -78,6 +78,10 @@ void AEnemy::BeginPlay()
 	CombatCollisionBox->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	CombatCollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CombatCollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+
+	//Our collision with camera will be ignored now (For capsule and mesh)
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 }
 
 // Called every frame
@@ -119,10 +123,9 @@ void AEnemy::AgroSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AA
 				MainCharacter->SetCombatTarget(nullptr);
 			}
 			MainCharacter->bHasCombatTarget = false;
-			if(MainCharacter->MainPlayerController)
-			{
-				MainCharacter->MainPlayerController->HideEnemyHealthBar();
-			}
+			
+			MainCharacter->UpdateCombatTarget();
+
 			SetEnemyMovementStatus(EEnemyMovementStatus::EMS_Idle);
 			if (AIController)
 			{
@@ -142,6 +145,7 @@ void AEnemy::CombatSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComponent
 			bHasValidTarget = true;
 			MainCharacter->SetCombatTarget(this);
 			MainCharacter->bHasCombatTarget = true;
+			MainCharacter->UpdateCombatTarget();
 			if (MainCharacter->MainPlayerController)
 			{
 				MainCharacter->MainPlayerController->DisplayEnemyHealthBar();
@@ -161,16 +165,17 @@ void AEnemy::CombatSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, 
 
 		if (MainCharacter)
 		{
-			if(MainCharacter->CombatTarget == this)
-			{
-				MainCharacter->bHasCombatTarget = false;
-				MainCharacter->SetCombatTarget(nullptr);
-			}
 			bOverlappingCombatSphere = false;		
 			if(EnemyMovementStatus != EEnemyMovementStatus::EMS_Attacking)
 			{ 
 				MoveToTarget(MainCharacter);
 				CombatTarget = nullptr;
+			}
+			if (MainCharacter->CombatTarget == this)
+			{
+				MainCharacter->SetCombatTarget(nullptr);
+				MainCharacter->bHasCombatTarget = false;
+				MainCharacter->UpdateCombatTarget();
 			}
 
 			//if the timer (between 2 attacks) is running, the next line will reset/clear it
@@ -290,23 +295,19 @@ void AEnemy::AttackEnd()
 	}
 }
 
-void AEnemy::DecrementHealth(float value)
-{
-	if ((health - value) <= 0)
-	{
-		health -= value;
-		Die();
-	}
-	health -= value;
-}
-
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	DecrementHealth(DamageAmount);
+	if ((health - DamageAmount) <= 0)
+	{
+		health -= DamageAmount;
+		Die(DamageCauser);
+	}
+	health -= DamageAmount;
+
 	return DamageAmount;
 }
 
-void AEnemy::Die()
+void AEnemy::Die(AActor* Killer)
 {
 	UAnimInstance* EnemyAnimInstance = GetMesh()->GetAnimInstance();
 	if (EnemyAnimInstance)
@@ -321,7 +322,13 @@ void AEnemy::Die()
 	CombatSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	//Set bHasCombatTarget to false????????
+	bIsAttacking = false;
+
+	AMainCharacter* MainCharacter = Cast<AMainCharacter>(Killer);
+	if (MainCharacter)
+	{
+		MainCharacter->UpdateCombatTarget();
+	}
 }
 
 void AEnemy::DeathEnd()
