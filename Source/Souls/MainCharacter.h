@@ -179,7 +179,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DeathEnd();
 
+	UFUNCTION(BlueprintCallable)
 	void IncrementCoins(int32 coinValue);
+
+	UFUNCTION(BlueprintCallable)
+	void IncrementHealth(float healValue);
 
 	void UpdateCombatTarget();
 

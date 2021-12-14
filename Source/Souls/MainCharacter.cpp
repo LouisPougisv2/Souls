@@ -337,6 +337,18 @@ void AMainCharacter::IncrementCoins(int32 coinValue)
 	coins += coinValue;
 }
 
+void AMainCharacter::IncrementHealth(float healValue)
+{
+	if (health + healValue >= maxHealth)
+	{
+		health = maxHealth;
+	}
+	else
+	{
+		health += healValue;
+	}
+}
+
 void AMainCharacter::UpdateCombatTarget()
 {
 	TArray<AActor*> OverlappingActors;

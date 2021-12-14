@@ -9,8 +9,6 @@
 
 APickupItems::APickupItems()
 {
-	coinCount = 0;
-	coinValue = 1;
 }
 
 void APickupItems::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -22,7 +20,7 @@ void APickupItems::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 		AMainCharacter* mainCharacter = Cast<AMainCharacter>(OtherActor);
 		if (mainCharacter)
 		{
-			mainCharacter->IncrementCoins(coinValue);
+			OnPickupBP(mainCharacter);
 			mainCharacter->PickupLocations.Add(GetActorLocation());
 
 			//Spawn the particle
