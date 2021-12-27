@@ -6,7 +6,6 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
 #include "Critter.h"
-#include "Enemy.h"
 #include "AIController.h"
 
 // Sets default values
@@ -53,11 +52,12 @@ TSubclassOf<AActor> ASpawnVolume::GetSpawnActor()
 {
 	if (SpawnActors.Num() > 0)
 	{
-		int32 Selection = FMath::FRandRange(0, SpawnActors.Num() - 1);
+		int32 Selection = FMath::RandRange(0, SpawnActors.Num() - 1);
 		return SpawnActors[Selection];
-	}	
+	}		
 	else 
 	{
+		UE_LOG(LogTemp, Warning, TEXT("GetSpawnActor Check failed"));
 		return nullptr;
 	}
 }
@@ -72,21 +72,7 @@ void ASpawnVolume::SpawnOurActor_Implementation(UClass* ToSpawn, const FVector& 
 
 		if(World)
 		{
-			AActor* ActorSpawned = World->SpawnActor<AActor>(ToSpawn, Location, FRotator(0.0f), SpawnParams);
-
-			AEnemy* EnemySpawned = Cast<AEnemy>(ActorSpawned);
-			if (EnemySpawned)
-			{
-				//Spawn an AIController for our EnemySpawned and actually set it
-				EnemySpawned->SpawnDefaultController();
-
-				AAIController* AIController = Cast<AAIController>(EnemySpawned->GetController());
-				if (AIController)
-				{ 
-					//now that we have access to the AIController, the Controller will be able to move
-					EnemySpawned->AIController = AIController;
-				}
-			}
+			World->SpawnActor<AActor>(ToSpawn, Location, FRotator(0.0f), SpawnParams);
 		}
 	}
 }
