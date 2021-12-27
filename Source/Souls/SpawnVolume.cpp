@@ -6,6 +6,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
 #include "Critter.h"
+#include "Enemy.h"
+#include "AIController.h"
 
 // Sets default values
 ASpawnVolume::ASpawnVolume()
@@ -20,6 +22,14 @@ ASpawnVolume::ASpawnVolume()
 void ASpawnVolume::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//filling the spawn array with the actors
+	if (ActorToSpawn_1 && ActorToSpawn_2 && ActorToSpawn_3)
+	{
+		SpawnActors.Add(ActorToSpawn_1);
+		SpawnActors.Add(ActorToSpawn_2);
+		SpawnActors.Add(ActorToSpawn_3);
+	}
 	
 }
 
@@ -39,16 +49,44 @@ FVector ASpawnVolume::GetSpawnPoint()
 	return UKismetMathLibrary::RandomPointInBoundingBox(OriginOfTheBox, Extent);
 }
 
+TSubclassOf<AActor> ASpawnVolume::GetSpawnActor()
+{
+	if (SpawnActors.Num() > 0)
+	{
+		int32 Selection = FMath::FRandRange(0, SpawnActors.Num() - 1);
+		return SpawnActors[Selection];
+	}	
+	else 
+	{
+		return nullptr;
+	}
+}
+
 //the +Implementation come from the BlueprintNativeEvents
-void ASpawnVolume::SpawnOurPawn_Implementation(UClass* ToSpawn, const FVector& Location)
+void ASpawnVolume::SpawnOurActor_Implementation(UClass* ToSpawn, const FVector& Location)
 {
 	if (ToSpawn)
 	{
 		UWorld* World = GetWorld();
+		FActorSpawnParameters SpawnParams;
 
 		if(World)
 		{
-			ACritter* SpawnedCritter = World->SpawnActor<ACritter>(ToSpawn, Location, FRotator(0.0f));
+			AActor* ActorSpawned = World->SpawnActor<AActor>(ToSpawn, Location, FRotator(0.0f), SpawnParams);
+
+			AEnemy* EnemySpawned = Cast<AEnemy>(ActorSpawned);
+			if (EnemySpawned)
+			{
+				//Spawn an AIController for our EnemySpawned and actually set it
+				EnemySpawned->SpawnDefaultController();
+
+				AAIController* AIController = Cast<AAIController>(EnemySpawned->GetController());
+				if (AIController)
+				{ 
+					//now that we have access to the AIController, the Controller will be able to move
+					EnemySpawned->AIController = AIController;
+				}
+			}
 		}
 	}
 }
