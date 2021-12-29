@@ -7,7 +7,7 @@
 #include "Engine/World.h"
 #include "Critter.h"
 #include "AIController.h"
-
+#include "Enemy.h"
 // Sets default values
 ASpawnVolume::ASpawnVolume()
 {
@@ -72,7 +72,22 @@ void ASpawnVolume::SpawnOurActor_Implementation(UClass* ToSpawn, const FVector& 
 
 		if(World)
 		{
-			World->SpawnActor<AActor>(ToSpawn, Location, FRotator(0.0f), SpawnParams);
+			AActor* Actor = World->SpawnActor<AActor>(ToSpawn, Location, FRotator(0.0f), SpawnParams);
+
+			AEnemy* EnemySpawned = Cast<AEnemy>(Actor);
+			
+			if (EnemySpawned)
+			{
+				//following lines allow the EnemySpawned to have a "brain", nont only a mesh
+				EnemySpawned->SpawnDefaultController();
+
+				AAIController* AICont = Cast<AAIController>(EnemySpawned->GetController());
+
+				if (AICont)
+				{
+					EnemySpawned->AIController = AICont;
+				}
+			}
 		}
 	}
 }
