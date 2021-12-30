@@ -157,6 +157,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	TSubclassOf<UDamageType> DamageTypeClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TSubclassOf<AEnemy> EnemyFilter;
+
 	void Attack();
 
 	UFUNCTION(BlueprintCallable)
@@ -176,7 +179,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DeathEnd();
 
+	UFUNCTION(BlueprintCallable)
 	void IncrementCoins(int32 coinValue);
+
+	UFUNCTION(BlueprintCallable)
+	void IncrementHealth(float healValue);
+
+	void UpdateCombatTarget();
 
 protected:
 	// Called when the game starts or when spawned

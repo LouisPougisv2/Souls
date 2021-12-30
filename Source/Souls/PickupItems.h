@@ -18,13 +18,10 @@ public:
 
 	APickupItems();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Coins")
-	int32 coinCount;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Coins")
-	int32 coinValue;
-
 	virtual void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 	virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Pick up")
+	void OnPickupBP(class AMainCharacter* character);
 
 };

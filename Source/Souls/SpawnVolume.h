@@ -19,7 +19,16 @@ public:
 	class UBoxComponent* SpawningBox;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning")
-	TSubclassOf<class ACritter> PawnToSpawn;
+	TSubclassOf<AActor> ActorToSpawn_1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning")
+	TSubclassOf<AActor> ActorToSpawn_2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning")
+	TSubclassOf<AActor> ActorToSpawn_3;
+
+	//Array to store the spawn actors in
+	TArray<TSubclassOf<AActor>> SpawnActors;
 
 protected:
 	// Called when the game starts or when spawned
@@ -32,9 +41,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spawning")
 	FVector GetSpawnPoint();
 
+	UFUNCTION(BlueprintPure, Category = "Spawning")
+	TSubclassOf<AActor> GetSpawnActor();
+
 	//BlueprintNativeEvents can have both C++ and Blueprint functionnalities, they're hybrids
-	//with this _Implmentation, UE4 knows that this is the implmentation that we scripted out in C++ 
+	//with this _Implmentation, UE4 knows that this is the implementation that we scripted out in C++ 
 	//and that part of it will also be carried out in blueprint
-	UFUNCTION(BlueprintNativeEvent, BLueprintCallable, Category = "Spawning")
-	void SpawnOurPawn(UClass* ToSpawn, const FVector& Location);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spawning")
+	void SpawnOurActor(UClass* ToSpawn, const FVector& Location);
 };
