@@ -187,6 +187,8 @@ public:
 
 	void UpdateCombatTarget();
 
+	void SwitchLevel(FName NewLevelName);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

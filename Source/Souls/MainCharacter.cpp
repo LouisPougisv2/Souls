@@ -396,6 +396,25 @@ void AMainCharacter::UpdateCombatTarget()
 	}
 }
 
+void AMainCharacter::SwitchLevel(FName NewLevelName)
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		const FString MapName = World->GetMapName();
+
+		//an FName cannot be initialized with an FString but can be with an String literal (obtained by dereferencing the FString
+		FName CurrentMapName(*MapName);
+
+		//We can now compare them to check if the current level is the same as the one the player is trying to transition into
+		if (CurrentMapName != NewLevelName)
+		{
+			UGameplayStatics::OpenLevel(World, NewLevelName);
+		}
+	}
+
+}
+
 void AMainCharacter::SetMovementStatus(EMovementStatus status)
 {
 	MovementStatus = status;	
