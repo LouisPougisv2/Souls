@@ -48,6 +48,7 @@ void ALevelTransitionVolume::OnOverlapBegin(UPrimitiveComponent* OverlappedCompo
 
 		if (MainCharacter)
 		{
+			//MainCharacter->SaveGame();
 			MainCharacter->SwitchLevel(TransitionLevelName);
 		}
 	}

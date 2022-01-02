@@ -16,6 +16,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Enemy.h"
 #include "MainPlayerController.h"
+#include "SoulsSaveGame.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -553,4 +554,42 @@ void AMainCharacter::SetEquippedWeapon(AWeapon* WeaponToSet)
 		GetEquippedWeapon()->Destroy();
 	}
 	EquippedWeapon = WeaponToSet; 
+}
+
+
+void AMainCharacter::SaveGame()
+{
+	//we create a USoulsSaveGame pointer
+	USoulsSaveGame* SaveGameInstance = Cast<USoulsSaveGame>(UGameplayStatics::CreateSaveGameObject(USoulsSaveGame::StaticClass()));
+
+	SaveGameInstance->CharacterStats.Health = health;
+	SaveGameInstance->CharacterStats.MaxHealth = maxHealth;
+	SaveGameInstance->CharacterStats.Stamina = stamina;
+	SaveGameInstance->CharacterStats.MaxStamina = maxStamina;
+	SaveGameInstance->CharacterStats.Coins = coins;
+
+	SaveGameInstance->CharacterStats.CharacterLocation = GetActorLocation();
+	SaveGameInstance->CharacterStats.CharacterRotation = GetActorRotation();
+
+	//Actually saving datas to the memory
+	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->PlayerSlot, SaveGameInstance->UserSlotIndex);
+}
+
+void AMainCharacter::LoadGame(bool SetPosition)
+{
+	USoulsSaveGame* LoadGameInstance = Cast<USoulsSaveGame>(UGameplayStatics::CreateSaveGameObject(USoulsSaveGame::StaticClass()));
+
+	LoadGameInstance = Cast<USoulsSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->PlayerSlot, LoadGameInstance->UserSlotIndex));
+
+	health = LoadGameInstance->CharacterStats.Health;
+	maxHealth = LoadGameInstance->CharacterStats.MaxHealth;
+	stamina = LoadGameInstance->CharacterStats.Stamina;
+	maxStamina = LoadGameInstance->CharacterStats.MaxStamina; 
+	coins = LoadGameInstance->CharacterStats.Coins;
+
+	if (SetPosition)
+	{
+		SetActorLocation(LoadGameInstance->CharacterStats.CharacterLocation);
+		SetActorRotation(LoadGameInstance->CharacterStats.CharacterRotation);
+	}
 }

@@ -189,6 +189,12 @@ public:
 
 	void SwitchLevel(FName NewLevelName);
 
+	UFUNCTION(BlueprintCallable)
+	void SaveGame();
+
+	UFUNCTION(BlueprintCallable)
+	void LoadGame(bool SetPosition);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
