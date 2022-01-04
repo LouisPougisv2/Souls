@@ -37,6 +37,11 @@ public:
 	// Sets default values for this character's properties
 	AMainCharacter();
 
+	//We're giving the Main character to choose from a drop down a weapon storage blueprint in this SubclassOf
+	//the main character has now access to the weapon storage and access the correct weapon we saved based on the name of it
+	UPROPERTY(EditDefaultsOnly, Category = " SavedData")
+	TSubclassOf<class AItemStorage> WeaponStorage;
+
 	//TArray used to try out the way they work
 	TArray<FVector> PickupLocations;
 
