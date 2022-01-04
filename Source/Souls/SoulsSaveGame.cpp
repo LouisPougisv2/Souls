@@ -6,6 +6,7 @@
 USoulsSaveGame::USoulsSaveGame()
 {
 	PlayerSlot = TEXT("Default");
-
 	UserSlotIndex = 0;
+
+	CharacterStats.WeaponName = TEXT("");
 }
