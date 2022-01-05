@@ -16,6 +16,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Enemy.h"
 #include "MainPlayerController.h"
+#include "SoulsSaveGame.h"
+#include "ItemStorage.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -396,6 +398,25 @@ void AMainCharacter::UpdateCombatTarget()
 	}
 }
 
+void AMainCharacter::SwitchLevel(FName NewLevelName)
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		const FString MapName = World->GetMapName();
+
+		//an FName cannot be initialized with an FString but can be with an String literal (obtained by dereferencing the FString
+		FName CurrentMapName(*MapName);
+
+		//We can now compare them to check if the current level is the same as the one the player is trying to transition into
+		if (CurrentMapName != NewLevelName)
+		{
+			UGameplayStatics::OpenLevel(World, NewLevelName);
+		}
+	}
+
+}
+
 void AMainCharacter::SetMovementStatus(EMovementStatus status)
 {
 	MovementStatus = status;	
@@ -534,4 +555,73 @@ void AMainCharacter::SetEquippedWeapon(AWeapon* WeaponToSet)
 		GetEquippedWeapon()->Destroy();
 	}
 	EquippedWeapon = WeaponToSet; 
+}
+
+
+void AMainCharacter::SaveGame()
+{
+	//we create a USoulsSaveGame pointer
+	USoulsSaveGame* SaveGameInstance = Cast<USoulsSaveGame>(UGameplayStatics::CreateSaveGameObject(USoulsSaveGame::StaticClass()));
+
+	SaveGameInstance->CharacterStats.Health = health;
+	SaveGameInstance->CharacterStats.MaxHealth = maxHealth;
+	SaveGameInstance->CharacterStats.Stamina = stamina;
+	SaveGameInstance->CharacterStats.MaxStamina = maxStamina;
+	SaveGameInstance->CharacterStats.Coins = coins;
+
+	if (EquippedWeapon)
+	{
+		//Associating the name of the equippedWeapon
+		SaveGameInstance->CharacterStats.WeaponName = EquippedWeapon->WeaponName;
+	}
+
+	SaveGameInstance->CharacterStats.CharacterLocation = GetActorLocation();
+	SaveGameInstance->CharacterStats.CharacterRotation = GetActorRotation();
+
+	//Actually saving datas to the memory
+	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->PlayerSlot, SaveGameInstance->UserSlotIndex);
+}
+
+void AMainCharacter::LoadGame(bool SetPosition)
+{
+	USoulsSaveGame* LoadGameInstance = Cast<USoulsSaveGame>(UGameplayStatics::CreateSaveGameObject(USoulsSaveGame::StaticClass()));
+
+	LoadGameInstance = Cast<USoulsSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->PlayerSlot, LoadGameInstance->UserSlotIndex));
+
+	health = LoadGameInstance->CharacterStats.Health;
+	maxHealth = LoadGameInstance->CharacterStats.MaxHealth;
+	stamina = LoadGameInstance->CharacterStats.Stamina;
+	maxStamina = LoadGameInstance->CharacterStats.MaxStamina; 
+	coins = LoadGameInstance->CharacterStats.Coins;
+
+	//If we close the game, the weapon will get destroyed, that's why we need to spawn a new one, hence 
+	//the ItemStorage class to store those blueprints
+	
+	if (WeaponStorage)
+	{
+		//First we create an instance of the weapons, containing a map
+		AItemStorage* Weapons =	GetWorld()->SpawnActor<AItemStorage>(WeaponStorage);
+
+		if (Weapons)
+		{
+			FString WeaponName = LoadGameInstance->CharacterStats.WeaponName;
+
+			//GetWorld() will spawn an actor of AWeapon type
+			//Spawning a new weapon based on what's in the map in our item storage 
+			if (Weapons->WeaponMap.Contains(WeaponName)) //we just want to be sure that the name in contained in the map before accessing it
+			{
+				AWeapon* WeaponToEquip = GetWorld()->SpawnActor<AWeapon>(Weapons->WeaponMap[WeaponName]);
+				WeaponToEquip->Equip(this);
+			}
+
+		}
+	}
+
+
+
+	if (SetPosition)
+	{
+		SetActorLocation(LoadGameInstance->CharacterStats.CharacterLocation);
+		SetActorRotation(LoadGameInstance->CharacterStats.CharacterRotation);
+	}
 }

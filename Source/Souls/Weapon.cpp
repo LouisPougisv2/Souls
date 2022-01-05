@@ -136,9 +136,13 @@ void AWeapon::Equip(AMainCharacter* character)
 			//Playing sound when equiped
 			UGameplayStatics::PlaySound2D(this, OnEquipSound);
 		}
-		if (bWeaponParticles)
+		if (!bWeaponParticles)
 		{
 			IdleParticlesComponent->Deactivate();
+		}
+		else
+		{
+			IdleParticlesComponent->Activate();
 		}
 	}
 }
