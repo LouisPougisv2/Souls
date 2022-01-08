@@ -232,10 +232,12 @@ public:
 	void LookUpAtRate(float Rate);
 
 	bool bLMBDown;
-
 	void LMBDown();
-
 	void LMBUp();
+
+	bool bESCDown;
+	void ESCDown();
+	void ESCUp();
 
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; };

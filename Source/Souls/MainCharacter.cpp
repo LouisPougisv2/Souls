@@ -69,6 +69,7 @@ AMainCharacter::AMainCharacter()
 
 	bShiftKeyDown = false;
 	bLMBDown = false;
+	bESCDown = false;
 
 	//Initialize Enum
 	MovementStatus = EMovementStatus::EMS_Normal;
@@ -152,6 +153,9 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction(TEXT("LMB"), EInputEvent::IE_Pressed, this, &AMainCharacter::LMBDown);
 	PlayerInputComponent->BindAction(TEXT("LMB"), EInputEvent::IE_Released, this, &AMainCharacter::LMBUp);
 
+	PlayerInputComponent->BindAction(TEXT("Pause"), EInputEvent::IE_Pressed,this, &AMainCharacter::ESCDown);
+	PlayerInputComponent->BindAction(TEXT("Pause"), EInputEvent::IE_Released, this, &AMainCharacter::ESCUp);
+	
 	//Movements for the character
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AMainCharacter::MoveForward);
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AMainCharacter::MoveRight);
@@ -161,6 +165,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAxis(TEXT("TurnRate"), this, &AMainCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, & AMainCharacter::LookUpAtRate);
+
 }
 
 void AMainCharacter::MoveForward(float Value)
@@ -443,6 +448,24 @@ void AMainCharacter::StartSprinting()
 void AMainCharacter::StopSprinting()
 {
 	bShiftKeyDown = false;
+}
+
+void AMainCharacter::ESCDown()
+{
+	bESCDown = true;
+	if (MainPlayerController)
+	{
+		MainPlayerController->TogglePauseMenu(); 
+	}
+}
+
+void AMainCharacter::ESCUp()
+{
+	bESCDown = false;
+	if (MainPlayerController)
+	{
+		MainPlayerController->TogglePauseMenu();
+	}
 }
 
 void AMainCharacter::UseStamina(float deltaStamina)
