@@ -4,6 +4,11 @@
 #include "MainPlayerController.h"
 #include "Blueprint/UserWidget.h"
 
+AMainPlayerController::AMainPlayerController()
+{
+	bPauseMenuVisible = false;
+}
+
 void AMainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -79,7 +84,7 @@ void AMainPlayerController::HideEnemyHealthBar()
 	}
 }
 
-void AMainPlayerController::DisplayPauseMenu()
+void AMainPlayerController::DisplayPauseMenu_Implementation()
 {
 	if (PauseMenu)
 	{
@@ -88,7 +93,7 @@ void AMainPlayerController::DisplayPauseMenu()
 	}
 }
 
-void AMainPlayerController::HidePauseMenu()
+void AMainPlayerController::HidePauseMenu_Implementation()
 {
 	if (PauseMenu)
 	{
@@ -99,12 +104,12 @@ void AMainPlayerController::HidePauseMenu()
 
 void AMainPlayerController::TogglePauseMenu()
 {
-	if (!bPauseMenuVisible)
+	if (bPauseMenuVisible)
 	{
-		DisplayPauseMenu();
+		HidePauseMenu();
 	}
 	else 
 	{
-		HidePauseMenu();
+		DisplayPauseMenu();
 	}
 }

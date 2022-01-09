@@ -16,6 +16,8 @@ class SOULS_API AMainPlayerController : public APlayerController
 
 public:
 
+	AMainPlayerController();
+
 	/*Reference to the UMG asset in the editor*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget")
 	TSubclassOf<class UUserWidget> HUDOverlayAsset;
@@ -49,8 +51,14 @@ public:
 
 	void HideEnemyHealthBar();
 
+	//Blueprints native events have some implementation in C++ and some in BP, they're hybrids
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
 	void DisplayPauseMenu();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
 	void HidePauseMenu();
+
 	void TogglePauseMenu();
 
 protected:
