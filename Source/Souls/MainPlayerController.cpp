@@ -91,13 +91,11 @@ void AMainPlayerController::DisplayPauseMenu_Implementation()
 		bPauseMenuVisible = true;
 		PauseMenu->SetVisibility(ESlateVisibility::Visible);
 
-		//FInputModeUIOnly allow us to use the for the UI but not in Game Mechanics
-		FInputModeUIOnly InputModeUIOnly;
-		SetInputMode(InputModeUIOnly);
-
-		//FInputModeGameAndUI InputModeGameAndUI;
-		//SetInputMode(InputModeGameAndUI);
+		FInputModeGameAndUI InputModeGameAndUI;
+		SetInputMode(InputModeGameAndUI);
 		bShowMouseCursor = true;
+
+
 	}
 }
 

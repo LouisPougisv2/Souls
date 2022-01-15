@@ -316,6 +316,8 @@ float AMainCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 void AMainCharacter::Die()
 {
 	if (MovementStatus == EMovementStatus::EMS_Dead) return;
+
+	if (MovementStatus == EMovementStatus::EMS_Dead) return;
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && CombatMontage)
 	{
@@ -462,10 +464,6 @@ void AMainCharacter::ESCDown()
 void AMainCharacter::ESCUp()
 {
 	bESCDown = false;
-	if (MainPlayerController)
-	{
-		MainPlayerController->TogglePauseMenu();
-	}
 }
 
 void AMainCharacter::UseStamina(float deltaStamina)
@@ -640,11 +638,13 @@ void AMainCharacter::LoadGame(bool SetPosition)
 		}
 	}
 
-
-
 	if (SetPosition)
 	{
 		SetActorLocation(LoadGameInstance->CharacterStats.CharacterLocation);
 		SetActorRotation(LoadGameInstance->CharacterStats.CharacterRotation);
 	}
+
+	SetMovementStatus(EMovementStatus::EMS_Normal);
+	GetMesh()->bPauseAnims = false;
+	GetMesh()->bNoSkeletonUpdate = false;
 }
