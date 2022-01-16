@@ -9,4 +9,5 @@ USoulsSaveGame::USoulsSaveGame()
 	UserSlotIndex = 0;
 
 	CharacterStats.WeaponName = TEXT("");
+	CharacterStats.MapName = TEXT("");
 }

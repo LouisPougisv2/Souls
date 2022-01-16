@@ -95,6 +95,15 @@ void AMainCharacter::BeginPlay()
 
 	//Next is put in begin play because we want to be sure to actually have our controller set before trying to set this variable value
 	MainPlayerController = Cast<AMainPlayerController>(GetController());
+
+	LoadGameNoSwitch();
+
+	//insure that we're with the FInputGameModeOnly
+	if (MainPlayerController)
+	{
+		MainPlayerController->GameModeOnly();
+	}
+
 }
 
 // Called every frame
@@ -412,7 +421,7 @@ void AMainCharacter::SwitchLevel(FName NewLevelName)
 	{
 		const FString MapName = World->GetMapName();
 
-		//an FName cannot be initialized with an FString but can be with an String literal (obtained by dereferencing the FString
+		//an FName cannot be initialized with an FString but can be with an String literal (obtained by dereferencing the FString)
 		FName CurrentMapName(*MapName);
 
 		//We can now compare them to check if the current level is the same as the one the player is trying to transition into
@@ -590,6 +599,11 @@ void AMainCharacter::SaveGame()
 	SaveGameInstance->CharacterStats.MaxStamina = maxStamina;
 	SaveGameInstance->CharacterStats.Coins = coins;
 
+	FString CurrentMapName = GetWorld()->GetMapName();
+	//Because the map name starts with a UEDPIE_ prefix, we need to remove if for future comparison
+	CurrentMapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+	SaveGameInstance->CharacterStats.MapName = CurrentMapName;
+
 	if (EquippedWeapon)
 	{
 		//Associating the name of the equippedWeapon
@@ -636,12 +650,59 @@ void AMainCharacter::LoadGame(bool SetPosition)
 			}
 
 		}
+
+		FString SavedMapName = LoadGameInstance->CharacterStats.MapName;
+
+		if (SavedMapName != TEXT(""))
+		{
+			SwitchLevel(FName(SavedMapName));
+		}
 	}
 
 	if (SetPosition)
 	{
 		SetActorLocation(LoadGameInstance->CharacterStats.CharacterLocation);
 		SetActorRotation(LoadGameInstance->CharacterStats.CharacterRotation);
+	}
+
+	SetMovementStatus(EMovementStatus::EMS_Normal);
+	GetMesh()->bPauseAnims = false;
+	GetMesh()->bNoSkeletonUpdate = false;
+}
+
+void AMainCharacter::LoadGameNoSwitch()
+{
+	USoulsSaveGame* LoadGameInstance = Cast<USoulsSaveGame>(UGameplayStatics::CreateSaveGameObject(USoulsSaveGame::StaticClass()));
+
+	LoadGameInstance = Cast<USoulsSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->PlayerSlot, LoadGameInstance->UserSlotIndex));
+
+	health = LoadGameInstance->CharacterStats.Health;
+	maxHealth = LoadGameInstance->CharacterStats.MaxHealth;
+	stamina = LoadGameInstance->CharacterStats.Stamina;
+	maxStamina = LoadGameInstance->CharacterStats.MaxStamina;
+	coins = LoadGameInstance->CharacterStats.Coins;
+
+	//If we close the game, the weapon will get destroyed, that's why we need to spawn a new one, hence 
+	//the ItemStorage class to store those blueprints
+
+	if (WeaponStorage)
+	{
+		//First we create an instance of the weapons, containing a map
+		AItemStorage* Weapons = GetWorld()->SpawnActor<AItemStorage>(WeaponStorage);
+
+		if (Weapons)
+		{
+			FString WeaponName = LoadGameInstance->CharacterStats.WeaponName;
+
+			//GetWorld() will spawn an actor of AWeapon type
+			//Spawning a new weapon based on what's in the map in our item storage 
+			if (Weapons->WeaponMap.Contains(WeaponName)) //we just want to be sure that the name in contained in the map before accessing it
+			{
+				AWeapon* WeaponToEquip = GetWorld()->SpawnActor<AWeapon>(Weapons->WeaponMap[WeaponName]);
+				WeaponToEquip->Equip(this);
+			}
+
+		}
 	}
 
 	SetMovementStatus(EMovementStatus::EMS_Normal);

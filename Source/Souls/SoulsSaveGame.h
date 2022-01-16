@@ -34,8 +34,11 @@ struct FCharacterStats
 	UPROPERTY(VisibleAnywhere, Category = "SavedGameDatas")
 	FRotator CharacterRotation;
 
-	UPROPERTY(EditDefaultsOnly, Category = "SavedData")
+	UPROPERTY(VisibleAnywhere, Category = "SavedData")
 	FString WeaponName;
+
+	UPROPERTY(VisibleAnywhere, Category = "SavedData")
+	FString MapName;
 };
 
 /**
