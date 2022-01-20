@@ -96,12 +96,19 @@ void AMainCharacter::BeginPlay()
 	//Next is put in begin play because we want to be sure to actually have our controller set before trying to set this variable value
 	MainPlayerController = Cast<AMainPlayerController>(GetController());
 
-	LoadGameNoSwitch();
 
-	//insure that we're with the FInputGameModeOnly
-	if (MainPlayerController)
+	//if we start in the SunTemple map, we don't want to load the game
+	FString Map = GetWorld()->GetMapName();
+	Map.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+	if (Map != "SunTemple")
 	{
-		MainPlayerController->GameModeOnly();
+		LoadGameNoSwitch();
+
+		//insure that we're with the FInputGameModeOnly
+		if (MainPlayerController)
+		{
+			MainPlayerController->GameModeOnly();
+		}
 	}
 
 }
