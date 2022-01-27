@@ -200,6 +200,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LoadGame(bool SetPosition);
 
+	UFUNCTION(BlueprintCallable)
+	void LoadGameNoSwitch();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -232,10 +235,12 @@ public:
 	void LookUpAtRate(float Rate);
 
 	bool bLMBDown;
-
 	void LMBDown();
-
 	void LMBUp();
+
+	bool bESCDown;
+	void ESCDown();
+	void ESCUp();
 
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; };

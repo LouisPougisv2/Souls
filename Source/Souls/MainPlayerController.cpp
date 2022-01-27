@@ -4,6 +4,11 @@
 #include "MainPlayerController.h"
 #include "Blueprint/UserWidget.h"
 
+AMainPlayerController::AMainPlayerController()
+{
+	bPauseMenuVisible = false;
+}
+
 void AMainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -15,6 +20,7 @@ void AMainPlayerController::BeginPlay()
 	HUDOverlay->AddToViewport();
 	HUDOverlay->SetVisibility(ESlateVisibility::Visible);
 
+	//HUD healthBar
 	if (WEnemyHealthBar)
 	{
 		//Creation of the widget
@@ -27,6 +33,18 @@ void AMainPlayerController::BeginPlay()
 		}
 		FVector2D Alignement(0.0f, 0.0f);
 		EnemyHealthBar->SetAlignmentInViewport(Alignement);
+	}
+
+	//PauseMenu
+	if (WPauseMenu)
+	{
+		//Creating the widget
+		PauseMenu = CreateWidget<UUserWidget>(this, WPauseMenu);
+		if (PauseMenu)
+		{
+			PauseMenu->AddToViewport();
+			PauseMenu->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 }
 
@@ -64,4 +82,50 @@ void AMainPlayerController::HideEnemyHealthBar()
 		bEnemyHealthBarVisible = false;
 		EnemyHealthBar->SetVisibility(ESlateVisibility::Hidden);
 	}
+}
+
+void AMainPlayerController::DisplayPauseMenu_Implementation()
+{
+	if (PauseMenu)
+	{
+		bPauseMenuVisible = true;
+		PauseMenu->SetVisibility(ESlateVisibility::Visible);
+
+		FInputModeGameAndUI InputModeGameAndUI;
+		SetInputMode(InputModeGameAndUI);
+		bShowMouseCursor = true;
+
+
+	}
+}
+
+void AMainPlayerController::HidePauseMenu_Implementation()
+{
+	if (PauseMenu)
+	{
+		GameModeOnly();
+
+		bShowMouseCursor = false;
+		bPauseMenuVisible = false;
+	}
+
+	
+}
+
+void AMainPlayerController::TogglePauseMenu()
+{
+	if (bPauseMenuVisible)
+	{
+		HidePauseMenu();
+	}
+	else 
+	{
+		DisplayPauseMenu();
+	}
+}
+
+void AMainPlayerController::GameModeOnly()
+{
+	FInputModeGameOnly InputModeGameOnly;
+	SetInputMode(InputModeGameOnly);
 }
